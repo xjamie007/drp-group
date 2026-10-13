@@ -135,13 +135,17 @@
   function reveal(root) {
     if (REDUCED || window.DRP_EDIT || !("IntersectionObserver" in window)) return;
     var io = new IntersectionObserver(function (es) {
-      es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("rv-in"); io.unobserve(e.target); } });
+      // was gleichzeitig ins Bild kommt, erscheint der Reihe nach: oben vor unten, links vor rechts (auch bei mehrspaltigen Rastern)
+      es.filter(function (e) { return e.isIntersecting; })
+        .sort(function (a, b) { return (a.boundingClientRect.top - b.boundingClientRect.top) || (a.boundingClientRect.left - b.boundingClientRect.left); })
+        .forEach(function (e, i) {
+          e.target.style.setProperty("--rv-d", Math.min(i, 5) * 0.09 + "s");
+          e.target.classList.add("rv-in"); io.unobserve(e.target);
+        });
     }, { rootMargin: "0px 0px -6% 0px", threshold: 0.08 });
     var fold = innerHeight;
     $$(RV_SEL, root.parentNode || document).forEach(function (el) {
       if (el.closest(".rv") || el.getBoundingClientRect().top < fold) return;
-      var sib = Array.prototype.indexOf.call(el.parentNode.children, el) % 4;
-      el.style.setProperty("--rv-d", sib * 0.09 + "s"); // Geschwister leicht versetzt
       el.classList.add("rv");
       io.observe(el);
     });
