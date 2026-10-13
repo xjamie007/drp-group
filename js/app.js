@@ -111,12 +111,21 @@
       ? '<img src="' + esc(src) + '" alt="' + esc(alt || "") + '"' + (eager ? ' fetchpriority="high"' : ' loading="lazy"') + ' decoding="async">'
       : ph()) + "</div>";
   }
+  /* Übersichten: kleine Fassung (…-card.jpg, 800 px) der Original-Objektfotos; hochgeladene Bilder ohne */
+  var CARD_IMG = {};
+  ((window.DRP_STORE ? window.DRP_STORE.original.data : D).items || []).forEach(function (it) { it.images.forEach(function (x) { if (/\.jpg$/.test(x)) CARD_IMG[x] = 1; }); });
+  function cardImg(src, alt, ratio, eager) {
+    var html = img(src, alt, ratio, eager);
+    if (!CARD_IMG[src]) return html;
+    return html.replace('<img src="' + esc(src) + '"', '<img src="' + esc(src) + '" srcset="' + esc(src.replace(/\.jpg$/, "-card.jpg")) + ' 800w, ' + esc(src) + ' 1400w"' +
+      ' sizes="(min-width: 1100px) 380px, (min-width: 700px) 50vw, 100vw"');
+  }
   function badge(it) {
     if (!isClosed(it)) return "";
     return '<span class="badge' + (it.statut === "loue" ? " badge--dark" : "") + '">' + esc(t("status." + it.statut)) + "</span>";
   }
   function media(it, ratio, eager) {
-    return '<div class="card__media" style="position:relative">' + badge(it) + img(it.images[0], it.titre, ratio, eager) + "</div>";
+    return '<div class="card__media" style="position:relative">' + badge(it) + cardImg(it.images[0], it.titre, ratio, eager) + "</div>";
   }
   function card(it) {
     return '<a class="card' + (isClosed(it) ? " is-closed" : "") + '" href="' + url(it) + '">' + media(it, "r-4x5") +
@@ -134,13 +143,28 @@
     ".arch-film-v", ".arch-wall > li", ".senses-words", ".contact-card", ".detail-grid > *", ".footer-grid > div"].join(",");
   function reveal(root) {
     if (REDUCED || window.DRP_EDIT || !("IntersectionObserver" in window)) return;
+    // Fotos im Block erst laden lassen, sonst tauchen sie in Ladereihenfolge statt von links nach rechts auf (max. 6 s warten)
+    function loaded(el) {
+      var ims = $$("img", el).filter(function (im) { return !im.complete; });
+      if (!ims.length) return Promise.resolve();
+      ims.forEach(function (im) { im.loading = "eager"; });
+      return Promise.race([
+        Promise.all(ims.map(function (im) { return new Promise(function (r) { im.addEventListener("load", r, { once: true }); im.addEventListener("error", r, { once: true }); }); })),
+        new Promise(function (r) { setTimeout(r, 6000); })
+      ]);
+    }
     var io = new IntersectionObserver(function (es) {
       // was gleichzeitig ins Bild kommt, erscheint der Reihe nach: oben vor unten, links vor rechts (auch bei mehrspaltigen Rastern)
+      var chain = Promise.resolve();
       es.filter(function (e) { return e.isIntersecting; })
         .sort(function (a, b) { return (a.boundingClientRect.top - b.boundingClientRect.top) || (a.boundingClientRect.left - b.boundingClientRect.left); })
-        .forEach(function (e, i) {
-          e.target.style.setProperty("--rv-d", Math.min(i, 5) * 0.09 + "s");
-          e.target.classList.add("rv-in"); io.unobserve(e.target);
+        .forEach(function (e) {
+          var el = e.target, ready = loaded(el);
+          io.unobserve(el);
+          chain = chain.then(function () { return ready; }).then(function () {
+            el.classList.add("rv-in");
+            return new Promise(function (r) { setTimeout(r, 90); }); // nächster Block kurz danach
+          });
         });
     }, { rootMargin: "0px 0px -6% 0px", threshold: 0.08 });
     var fold = innerHeight;
@@ -428,7 +452,7 @@
   }
   function popupHtml(group) {
     return group.map(function (it) {
-      return '<a class="pop" href="' + url(it) + '">' + '<div style="position:relative">' + badge(it) + img(it.images[0], "", "r-3x2") + "</div>" +
+      return '<a class="pop" href="' + url(it) + '">' + '<div style="position:relative">' + badge(it) + cardImg(it.images[0], "", "r-3x2") + "</div>" +
         '<div class="pop__body"><div class="card__place">' + esc(place(it)) + " · " + esc(t("status." + it.statut)) + "</div>" +
         '<div class="card__title">' + esc(it.titre) + '</div><span class="link-arrow">' + esc(t("common.discover")) + "</span></div></a>";
     }).join("");
@@ -824,7 +848,7 @@
       bindFilters($("#map-filters"), st, function (el) { draw(el); });
       refocus(focusEl);
       $("#map-list").innerHTML = res.length ? "<ol>" + res.map(function (it) {
-        return '<li><div class="map-row" data-id="' + esc(it.id) + '">' + '<a href="' + url(it) + '" style="position:relative">' + badge(it) + img(it.images[0], "", "r-4x5") + "</a>" +
+        return '<li><div class="map-row" data-id="' + esc(it.id) + '">' + '<a href="' + url(it) + '" style="position:relative">' + badge(it) + cardImg(it.images[0], "", "r-4x5") + "</a>" +
           '<div><div class="card__place">' + esc(place(it)) + " · " + esc(t("status." + it.statut)) + "</div>" +
           '<a class="card__title" style="display:block;text-decoration:none" href="' + url(it) + '">' + esc(it.titre) + "</a>" +
           '<div class="card__meta">' + esc(metaLine(it)) + '</div><div class="card__price">' + esc(priceText(it)) + "</div>" +
