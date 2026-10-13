@@ -28,6 +28,7 @@
     if (s === undefined) s = lookup(I.en, key);
     if (s === undefined) return key;
     if (vars) Object.keys(vars).forEach(function (k) { s = s.split("{" + k + "}").join(vars[k]); });
+    else if (window.DRP_EDIT) s = "\uE000" + key + "\uE001" + s + "\uE002";
     return s;
   }
   function setLang(l) {
@@ -123,6 +124,29 @@
       '<h3 class="card__title">' + esc(it.titre) + "</h3>" +
       '<div class="card__meta">' + esc(metaLine(it)) + "</div>" +
       '<div class="card__price">' + esc(priceText(it)) + "</div></a>";
+  }
+
+  /* Scroll-Animation: Blöcke unterhalb des sichtbaren Bereichs gleiten beim Runterscrollen sanft herein.
+     Was beim Laden schon zu sehen ist, bleibt unberührt (kein Aufblitzen); ohne IntersectionObserver,
+     bei „Bewegung reduzieren“ und im Bearbeiten-Modus passiert nichts. */
+  var RV_SEL = [".page-intro", ".section-head", ".section .wrap > .lead", ".wrap--narrow > *", ".split > *", ".grid > *", ".ventures > *",
+    ".team-grid > *", ".services > *", ".principles > li", ".fpc-section", ".map-preview", ".quote .wrap", ".cta-band .wrap > *",
+    ".arch-film-v", ".arch-wall > li", ".senses-words", ".contact-card", ".detail-grid > *", ".footer-grid > div"].join(",");
+  function reveal(root) {
+    if (REDUCED || window.DRP_EDIT || !("IntersectionObserver" in window)) return;
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("rv-in"); io.unobserve(e.target); } });
+    }, { rootMargin: "0px 0px -6% 0px", threshold: 0.08 });
+    var fold = innerHeight;
+    $$(RV_SEL, root.parentNode || document).forEach(function (el) {
+      if (el.closest(".rv") || el.getBoundingClientRect().top < fold) return;
+      var sib = Array.prototype.indexOf.call(el.parentNode.children, el) % 4;
+      el.style.setProperty("--rv-d", sib * 0.09 + "s"); // Geschwister leicht versetzt
+      el.classList.add("rv");
+      io.observe(el);
+    });
+    document.documentElement.classList.add("rv-on");
+    cleanups.push(function () { io.disconnect(); });
   }
 
   /* Fehlende Bilddatei → Platzhalter, damit das Layout steht */
@@ -264,7 +288,8 @@
       '<h2 style="margin-top:32px">' + esc(t("common.language")) + "</h2>" + langSwitch() + "</div>" +
       "</div>" +
       '<div class="footer-bottom"><span>© ' + year + " " + esc(s.societe) + ". " + esc(t("footer.rights")) + "</span>" +
-      '<a href="' + s.confidentialite + '" target="_blank" rel="noopener">' + esc(t("footer.privacy")) + "</a></div>" +
+      '<a href="' + s.confidentialite + '" target="_blank" rel="noopener">' + esc(t("footer.privacy")) + "</a>" +
+      '<a class="footer-credit" href="https://nave.lu" target="_blank" rel="noopener">Created by Nave</a></div>' +
       "</div></footer>" +
       '<div class="mobile-bar"><a href="' + s.telephones[0].href + '">' + ICON.phone + esc(t("common.call")) + '</a>' + (IS_OBJ ? '<a href="contact.html">' + esc(t("nav.contact")) + "</a>" : '<a href="estimation.html">' + esc(t("nav.cta")) + "</a>") + "</div>";
   }
@@ -548,7 +573,7 @@
       tick();
     }
     // läuft von selbst weiter; Pause per Knopf, beim Drüberfahren/Fokus, außerhalb des Bildschirms; nicht bei „weniger Bewegung“
-    var DELAY = 7000, timer, stopped = matchMedia("(prefers-reduced-motion: reduce)").matches, held = false, seen = false;
+    var DELAY = 7000, timer, stopped = REDUCED || !!window.DRP_EDIT, held = false, seen = false;
     var play = $(".fpc__play", box);
     function tick() { clearTimeout(timer); if (!stopped && !held && seen && !document.hidden) timer = setTimeout(function () { show(k + 1, 1); }, DELAY); }
     function setStopped(v) {
@@ -741,9 +766,9 @@
       var res = all.filter(function (i) {
         return (!st.type || i.categorie === st.type) && (!st.statut || i.statut === st.statut) && (!st.bereich || i.bereich === st.bereich) && (!st.commune || i.localite === st.commune);
       });
-      main.innerHTML = pageHead(D.site.entetes[isB ? "biens" : "projets"], t("list.residential")) +
-        '<div class="wrap"><div class="page-intro"><h2 class="h-display">' + esc(t(isB ? "list.properties_title" : "list.projects_title")) + "</h2>" +
-        '<p class="lead" style="margin-top:20px">' + esc(t(isB ? "list.properties_lead" : "list.projects_lead")) + "</p></div>" +
+      main.innerHTML = pageHead(D.site.entetes[isB ? "biens" : "projets"], t(isB ? "nav.properties" : "nav.projects")) +
+        '<div class="wrap"><div class="page-intro">' +
+        '<p class="lead">' + esc(t(isB ? "list.properties_lead" : "list.projects_lead")) + "</p></div>" +
         filtersHtml(defs, st, res.length) +
         (res.length ? '<div class="grid">' + res.map(card).join("") + "</div>"
           : '<p class="empty">' + esc(t("common.none")) + ' <a href="' + location.pathname.split("/").pop() + '">' + esc(t("common.reset")) + "</a></p>") +
@@ -762,12 +787,12 @@
       { key: "statut", kind: "chips", legend: t("map.f_status"), all: t("list.f_all"), options: ["a-vendre", "a-louer", "vendu", "en-cours", "realise"].map(function (s) { return { v: s, label: t("status." + s) }; }) }
     ];
     var st = readFilters(defs);
-    var view = "list";
-    main.innerHTML = pageHead(D.site.entetes.carte, t("map.lead"), t("map.title")) +
+    var view = "map"; // Handy: Karte zuerst, Liste per Knopf
+    main.innerHTML = pageHead(D.site.entetes.carte, t("nav.map")) +
       '<div class="wrap"><div id="map-filters"></div>' +
-      '<div class="map-toggle chips" role="group"><button type="button" class="chip" data-view="list" aria-pressed="true">' + esc(t("map.show_list")) + "</button>" +
-      '<button type="button" class="chip" data-view="map" aria-pressed="false">' + esc(t("map.show_map")) + "</button></div>" +
-      '<div class="map-layout" data-view="list"><div class="map-list" id="map-list"></div>' +
+      '<div class="map-toggle chips" role="group"><button type="button" class="chip" data-view="map" aria-pressed="true">' + esc(t("map.show_map")) + "</button>" +
+      '<button type="button" class="chip" data-view="list" aria-pressed="false">' + esc(t("map.show_list")) + "</button></div>" +
+      '<div class="map-layout" data-view="map"><div class="map-list" id="map-list"></div>' +
       '<div class="map-pane"><div id="map" role="region" aria-label="' + esc(t("map.region")) + '"></div>' +
       '<p class="map-note"><span class="marker marker--bien" style="display:inline-block;vertical-align:-2px"></span> ' + esc(t("map.legend_bien")) +
       ' &nbsp; <span class="marker marker--projet" style="display:inline-block;vertical-align:-1px;margin-left:6px"></span>&nbsp; ' + esc(t("map.legend_projet")) +
@@ -821,10 +846,11 @@
       layer = addMarkers(L, map, res, function (group, m) { group.forEach(function (it) { markers[it.id] = m; }); });
     }
     draw();
+    var mapEl = $("#map", main);
     loadLeaflet().then(function (lf) {
       L = lf;
-      if (!document.body.contains($("#map"))) return;
-      map = baseMap(L, $("#map"), { scrollWheelZoom: true });
+      if (!document.body.contains(mapEl)) return;
+      map = baseMap(L, mapEl, { scrollWheelZoom: true });
       fitItems(L, map, D.items);
       fitted = $("#map").offsetWidth > 0;
       plot(filtered());
@@ -908,8 +934,9 @@
 
     initGallery(main, imgs, it.titre, videoHtml);
     initBeforeAfter(main);
+    var miniEl = $("#mini-map", main);
     loadLeaflet().then(function (L) {
-      var el = $("#mini-map"); if (!el) return;
+      var el = miniEl; if (!el || !document.body.contains(el)) return;
       var map = baseMap(L, el, { zoomControl: true, dragging: true });
       map.setView([it.lat, it.lng], 12);
       // ungefähre Lage: Kreis um die Ortsmitte statt Nadel auf einem Gebäude
@@ -948,7 +975,7 @@
 
   pages.durabilite = function (main) {
     var green = D.items.filter(function (i) { return i.type === "projet" && txt(i.description).join(" ").indexOf("Green Challenge") > -1; });
-    main.innerHTML = pageHead(D.site.entetes.durabilite, t("sust.lead"), t("sust.title")) +
+    main.innerHTML = pageHead(D.site.entetes.durabilite, t("nav.sustainability")) +
       '<section class="section"><div class="wrap wrap--narrow"><p class="lead">' + esc(t("sust.vision")) + "</p></div></section>" +
       '<section class="section section--off"><div class="wrap"><div class="split">' +
       img((byId("trinary-reckange-mersch") || { images: [] }).images[0], "", "r-4x5") +
@@ -957,9 +984,6 @@
       '<section class="section"><div class="wrap"><h2 class="h-section" style="margin-bottom:32px">' + esc(t("sust.principles_title")) + '</h2><ul class="principles">' +
       ["p1", "p2", "p3", "p4"].map(function (k, i) { return '<li><span class="service__num">0' + (i + 1) + "</span><strong>" + esc(t("sust." + k)) + "</strong></li>"; }).join("") +
       "</ul></div></section>" +
-      '<section class="section section--tight"><div class="wrap"><h2 class="h-section" style="margin-bottom:32px">' + esc(t("sust.figures_title")) + '</h2><div class="stats">' +
-      '<div class="stat"><div class="stat__value">' + (D.site.arbres_plantes != null ? esc(num(D.site.arbres_plantes)) : todo()) + '</div><div class="stat__label">' + esc(t("sust.trees")) + "</div></div>" +
-      '<div class="stat"><div class="stat__value">' + todo() + '</div><div class="stat__label">' + esc(t("sust.energy")) + "</div></div></div></div></section>" +
       '<section class="section"><div class="wrap"><h2 class="h-section" style="margin-bottom:40px">' + esc(t("sust.projects_title")) + '</h2><div class="grid">' + green.map(card).join("") + "</div></div></section>" +
       ctaBand();
   };
@@ -967,7 +991,7 @@
   pages.about = function (main) {
     var p = function (id, n) { return (byId(id) || { images: [] }).images[n || 0]; };
     // Über uns: Kopf wie alte About-Seite, dann das Team, darunter der Rest der Seite
-    main.innerHTML = pageHead(D.site.entetes.about, t("about.h1")) + teamSection() +
+    main.innerHTML = pageHead(D.site.entetes.about, t("nav.about")) + intro(t("about.h1")) + teamSection() +
       '<section class="section section--off"><div class="wrap"><div class="split">' + img(p("residences-blanchy-rene-bascharage", 1), "", "r-4x5") +
       '<div><p class="lead">' + esc(t("about.p1")) + "</p></div></div></div></section>" +
       '<section class="section"><div class="wrap"><div class="split"><div><h2 class="h-section">' + esc(t("about.h2")) + '</h2><p class="lead" style="margin-top:24px">' + esc(t("sust.vision")) + "</p>" +
@@ -995,12 +1019,12 @@
   }
 
   pages.team = function (main) {
-    main.innerHTML = pageHead(D.site.entetes.team, t("team.lead")) + teamSection() + ctaBand();
+    main.innerHTML = pageHead(D.site.entetes.team, t("nav.team")) + intro(t("team.lead")) + teamSection() + ctaBand();
   };
 
   pages.services = function (main) {
     main.innerHTML =
-      pageHead(D.site.entetes.services, t("services.title")) +
+      pageHead(D.site.entetes.services, t("nav.services")) + intro(t("services.title")) +
       '<section class="section section--tight"><div class="wrap"><div class="section-head"><div><span class="eyebrow">DRP Luxembourg</span><h2 class="h-section">' + esc(t("services.agency")) + "</h2></div>" +
       '<a class="link-arrow" href="drp-luxembourg.html">DRP Luxembourg</a></div>' + services("lux", 4) + "</div></section>" +
       '<section class="section section--tight"><div class="wrap"><div class="section-head"><div><span class="eyebrow">DRP Real Estate</span><h2 class="h-section">' + esc(t("services.dev")) + "</h2></div>" +
@@ -1036,7 +1060,7 @@
     var ref = byId(param("ref"));
     var visit = param("sujet") === "visite";
     main.innerHTML =
-      pageHead(D.site.entetes.contact, t("contact.lead")) +
+      pageHead(D.site.entetes.contact, t("nav.contact")) + intro(t("contact.lead")) +
       '<div class="wrap"><div class="split split--top" style="padding:clamp(48px,6vw,96px) 0 clamp(64px,10vw,140px)"><div>' +
       '<ul class="keyfacts" style="margin-bottom:32px">' +
       "<li><span>" + esc(t("contact.address")) + "</span><span>" + esc(s.societe) + "<br>" + s.adresse.map(esc).join("<br>") + "<br><small class=\"muted\">(" + esc(s.adresse_note) + ")</small></span></li>" +
@@ -1055,8 +1079,9 @@
       '<p class="muted" style="font-size:.85rem;margin:0">' + esc(t("form.recipient")) + "</p>" +
       '<div><button class="btn" type="submit">' + esc(t("form.send")) + "</button></div></form></div></div></div>" + ctaBand();
     initForm(main);
+    var miniEl = $("#mini-map", main);
     loadLeaflet().then(function (L) {
-      var el = $("#mini-map"); if (!el) return;
+      var el = miniEl; if (!el || !document.body.contains(el)) return;
       var map = baseMap(L, el, {});
       map.setView([s.lat, s.lng], 13);
       L.marker([s.lat, s.lng], { icon: markerIcon(L, [{ type: "projet", statut: "" }]), title: "DRP Group", alt: "DRP Group" }).addTo(map);
@@ -1066,7 +1091,7 @@
   pages.estimation = function (main) {
     var communes = uniq(D.items.map(function (i) { return i.localite; }));
     main.innerHTML =
-      pageHead(D.site.entetes.estimation, t("cta.title")) +
+      pageHead(D.site.entetes.estimation, t("nav.cta")) +
       '<div class="wrap wrap--narrow"><div class="page-intro"><p class="lead">' + esc(t("form.lead")) + "</p></div>" +
       '<form class="form" novalidate data-form="estimation" style="padding-bottom:clamp(64px,10vw,140px)">' +
       '<h2 class="h-small">' + esc(t("form.property")) + '</h2><div class="form-grid">' +
@@ -1128,9 +1153,15 @@
   function initHero() {
     var m = $(".hero__media");
     if (!m) return;
-    $(".hero__media img").alt = t("home.hero_alt");
+    var hi = $(".hero__media img");
+    hi.alt = t("home.hero_alt");
     $(".hero__scroll").setAttribute("aria-label", t("home.scroll"));
     $(".hero__scroll span").textContent = t("home.scroll");
+    if (D.site.hero_image && D.site.hero_image !== "assets/hero/hero.jpg") { // im Admin ersetzt
+      if (hi.getAttribute("src") !== D.site.hero_image) { hi.removeAttribute("srcset"); hi.src = D.site.hero_image; }
+      $$("video", m).forEach(function (v) { v.remove(); }); m.classList.remove("has-video");
+      return;
+    }
     if (REDUCED || m.dataset.videoTried) return;
     m.dataset.videoTried = "1";
     if (document.readyState !== "complete") { window.addEventListener("load", function () { delete m.dataset.videoTried; initHero(); }, { once: true }); return; }
@@ -1148,6 +1179,7 @@
 
   /* ------------------------------------------------------------ render */
   function render() {
+    D = window.DRP_DATA; I = window.DRP_I18N;
     cleanups.forEach(function (fn) { try { fn(); } catch (e) { /* ignore */ } });
     cleanups = [];
     document.documentElement.lang = lang;
@@ -1160,12 +1192,19 @@
     var main = $("#main");
     main.innerHTML = "";
     $$("[data-lang]").forEach(function (b) { b.addEventListener("click", function () { setLang(b.dataset.lang); }); });
-    function fill() { if (pages[PAGE]) pages[PAGE](main); footer(); }
+    function fill() { if (pages[PAGE]) pages[PAGE](main); footer(); reveal(main); APP.rendered(main); }
     // Startseite: alles unter dem Hero erst nach dem ersten Paint aufbauen, damit das Hero-Foto zuerst lädt
     var hero = $(".hero__media img");
     if (!hero) return fill();
     var later = function () { requestAnimationFrame(function () { requestAnimationFrame(fill); }); };
     if (hero.complete) later(); else { hero.addEventListener("load", later, { once: true }); hero.addEventListener("error", later, { once: true }); }
   }
-  render();
+  /* Schnittstelle für den Admin-Bereich (js/admin.js) */
+  var APP = window.DRP_APP = {
+    render: render, t: t, page: PAGE, param: param, url: url,
+    lang: function () { return lang; }, langs: LANGS, setLang: setLang,
+    hooks: [], rendered: function (root) { APP.hooks.forEach(function (fn) { fn(root); }); }
+  };
+  // gespeicherte Änderungen (js/storage.js) zuerst laden, dann aufbauen
+  (window.DRP_READY || Promise.resolve()).then(render, render);
 })();

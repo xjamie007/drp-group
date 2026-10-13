@@ -178,6 +178,7 @@
     visit: "DRP Architecture besichen ↗"
   },
   list: {
+    f_status: "Stand",
     residential: "Mir entwéckelen just Wunnprojeten: Residenzen an Eefamilljenhaiser. Kontaktéiert eis gär fir méi Informatiounen.",
     f_origin: "Offer",
     origin_dev: "Eege Projeten",
@@ -192,6 +193,7 @@
     all_communes: "All Uertschaften"
   },
   map: {
+    f_status: "Stand",
     title: "Kaart",
     lead: "Immobilien a Projeten uechter d’Land. All Entrée ass an der Mëtt vun hirer Uertschaft agezeechent.",
     f_what: "Weisen",

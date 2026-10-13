@@ -178,6 +178,7 @@
     visit: "DRP Architecture besuchen ↗"
   },
   list: {
+    f_status: "Stand",
     residential: "Wir entwickeln ausschließlich Wohnprojekte: Residenzen und Einfamilienhäuser. Sprechen Sie uns gern für weitere Informationen an.",
     f_origin: "Angebot",
     origin_dev: "Eigene Projekte",
@@ -192,6 +193,7 @@
     all_communes: "Alle Orte"
   },
   map: {
+    f_status: "Stand",
     title: "Karte",
     lead: "Immobilien und Projekte in ganz Luxemburg. Jeder Eintrag ist in der Ortsmitte verortet.",
     f_what: "Anzeigen",

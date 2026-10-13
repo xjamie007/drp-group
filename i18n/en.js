@@ -178,6 +178,7 @@
     visit: "Visit DRP Architecture ↗"
   },
   list: {
+    f_status: "Status",
     residential: "We are developing residential projects only; residences and single houses. Feel free to reach out for further information.",
     f_origin: "Offer",
     origin_dev: "Our developments",
@@ -192,6 +193,7 @@
     all_communes: "All localities"
   },
   map: {
+    f_status: "Status",
     title: "Map",
     lead: "Properties and projects across Luxembourg. Every location is shown at the centre of its locality.",
     f_what: "Show",
