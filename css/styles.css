@@ -718,4 +718,6 @@ html.rv-on .rv.rv-in { opacity: 1; translate: 0 0; transition: opacity .9s cubic
 
 /* ---------- Footer: Nave ---------- */
 .footer-credit { margin-left: auto; }
+.cta-note { margin: 12px 0 0; font-size: .82rem; color: var(--muted); }
+.on-dark .cta-note { color: rgba(255, 255, 255, .72); }
 

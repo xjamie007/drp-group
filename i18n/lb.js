@@ -108,8 +108,9 @@
     who_cta: "Iwwer DRP Group"
   },
   cta: {
+    condition: "Gratis Präisestimatioun, wa mir de Verkaf iwwerhuelen.",
     title: "Gratis Estimatioun vun Ärer Immobilie",
-    text: "Dat éischt Gespréich ass gratis.",
+    text: "Gratis Präisestimatioun, wa mir de Verkaf iwwerhuelen. Dat éischt Gespréich ass gratis.",
     button: "Gratis Estimatioun",
     secondary: "Kontaktéiert eis"
   },
@@ -136,7 +137,7 @@
     s3_t: "Professionelle Rot",
     s3_p: "Dir wësst nach net, ob Dir kafe oder verkafe wëllt? Kommt laanscht. Mir deelen eis Erfarung a weisen Iech d’Méiglechkeeten.",
     s4_t: "Gratis Estimatioun",
-    s4_p: "Eng gratis Präisestimatioun, wa mir de Verkaf iwwerhuelen."
+    s4_p: "Gratis Präisestimatioun, wa mir de Verkaf iwwerhuelen."
   },
   re: {
     intro: "Promotioun ass d’Haaptkompetenz vun DRP Group: e Projet vun Ufank un z’entwéckelen. D’Clientë kënnen enk mat den Architekten an Ingenieure schaffen. Well et zu Lëtzebuerg wéineg Bauland gëtt, ass d’Renovéieren an Ëmbaue vun Existéierendem esou wichteg wéi den Neibau.",

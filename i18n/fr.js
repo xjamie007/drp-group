@@ -108,8 +108,9 @@
     who_cta: "À propos de DRP Group"
   },
   cta: {
+    condition: "Estimation de prix gratuite, si nous nous chargeons de la vente finale.",
     title: "Estimation gratuite de votre bien",
-    text: "Le premier entretien est gratuit.",
+    text: "Estimation de prix gratuite, si nous nous chargeons de la vente finale. Le premier entretien est gratuit.",
     button: "Estimation gratuite",
     secondary: "Nous contacter"
   },
@@ -136,7 +137,7 @@
     s3_t: "Conseil professionnel",
     s3_p: "Vous hésitez encore entre acheter et vendre ? Venez en parler avec nous. Nous partageons notre expérience et vous présentons les options.",
     s4_t: "Estimation gratuite",
-    s4_p: "Une estimation de prix gratuite, si nous nous chargeons de la vente."
+    s4_p: "Estimation de prix gratuite, si nous nous chargeons de la vente finale."
   },
   re: {
     intro: "La promotion immobilière est le métier premier de DRP Group : développer un projet de A à Z. Nos clients peuvent travailler en étroite collaboration avec les architectes et les ingénieurs. Le terrain constructible étant rare au Luxembourg, rénover et transformer l’existant compte autant que construire du neuf.",

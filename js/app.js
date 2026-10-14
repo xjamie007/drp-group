@@ -242,7 +242,7 @@
       NAV.map(function (n) { return '<li><a href="' + n[1] + '"' + current(n[0]) + ">" + esc(t(n[2])) + "</a></li>"; }).join("") +
       '<li><a href="team.html"' + current("team") + ">" + esc(t("nav.team")) + "</a></li></ul>" +
       '<span class="eyebrow group-label">' + esc(t("nav.activities")) + "</span><ul>" + subs + "</ul></nav>" +
-      langSwitch() + '<a class="btn" href="estimation.html">' + esc(t("nav.cta")) + "</a></div>";
+      langSwitch() + '<a class="btn" href="estimation.html">' + esc(t("nav.cta")) + "</a>" + ctaNote() + "</div>";
 
     var hdr = $(".site-header");
     var toggle = $(".nav-toggle");
@@ -323,6 +323,8 @@
   }
 
   /* ------------------------------------------------------------ shared sections */
+  // Bedingung zur kostenlosen Bewertung – steht überall, wo sie angeboten wird
+  function ctaNote() { return '<p class="cta-note">' + esc(t("cta.condition")) + "</p>"; }
   function ctaBand() {
     return '<section class="cta-band on-dark"><div class="wrap"><div><h2>' + esc(t("cta.title")) + "</h2><p>" + esc(t("cta.text")) + "</p></div>" +
       '<div class="btn-row"><a class="btn btn--light" href="estimation.html">' + esc(t("cta.button")) + '</a>' +
@@ -1058,7 +1060,7 @@
       '<section class="section section--tight"><div class="wrap"><div class="section-head"><div><span class="eyebrow">DRP Real Estate</span><h2 class="h-section">' + esc(t("services.dev")) + "</h2></div>" +
       '<a class="link-arrow" href="drp-real-estate.html">DRP Real Estate</a></div>' + services("re", 3) + "</div></section>" +
       '<section class="section section--off"><div class="wrap"><div class="split"><div><h2 class="h-section">' + esc(t("services.q_title")) + '</h2><p class="lead" style="margin-top:20px">' + esc(t("services.q_text")) + "</p></div>" +
-      '<div class="btn-row"><a class="btn" href="contact.html">' + esc(t("cta.secondary")) + '</a><a class="btn btn--ghost" href="estimation.html">' + esc(t("nav.cta")) + "</a></div></div></div></section>" +
+      '<div><div class="btn-row"><a class="btn" href="contact.html">' + esc(t("cta.secondary")) + '</a><a class="btn btn--ghost" href="estimation.html">' + esc(t("nav.cta")) + "</a></div>" + ctaNote() + "</div></div></div></section>" +
       ctaBand();
   };
 

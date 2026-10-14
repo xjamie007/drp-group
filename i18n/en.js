@@ -108,8 +108,9 @@
     who_cta: "About DRP Group"
   },
   cta: {
+    condition: "Free price estimation, in case we are responsible for the final sale.",
     title: "Free valuation of your property",
-    text: "The initial consultation is free of charge.",
+    text: "Free price estimation, in case we are responsible for the final sale. The initial consultation is free of charge.",
     button: "Free valuation",
     secondary: "Contact us"
   },
@@ -136,7 +137,7 @@
     s3_t: "Professional advice",
     s3_p: "Not sure yet whether to buy or sell? Come and talk to us. We share what we know and set out your options.",
     s4_t: "Free valuation",
-    s4_p: "A free price estimation, provided we handle the final sale."
+    s4_p: "Free price estimation, in case we are responsible for the final sale."
   },
   re: {
     intro: "Real estate development is DRP Group’s primary expertise: developing a project from scratch. Clients can work closely with the architects and engineers. With little constructible land in Luxembourg, renovating and transforming existing buildings matters as much as building new ones.",

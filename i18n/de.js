@@ -108,8 +108,9 @@
     who_cta: "Über DRP Group"
   },
   cta: {
+    condition: "Kostenlose Preiseinschätzung, wenn wir den späteren Verkauf übernehmen.",
     title: "Kostenlose Bewertung Ihrer Immobilie",
-    text: "Das erste Gespräch ist kostenlos.",
+    text: "Kostenlose Preiseinschätzung, wenn wir den späteren Verkauf übernehmen. Das erste Gespräch ist kostenlos.",
     button: "Kostenlose Bewertung",
     secondary: "Kontakt aufnehmen"
   },
@@ -136,7 +137,7 @@
     s3_t: "Fachliche Beratung",
     s3_p: "Sie wissen noch nicht, ob Sie kaufen oder verkaufen möchten? Sprechen Sie mit uns. Wir teilen unsere Erfahrung und zeigen Ihnen die Möglichkeiten.",
     s4_t: "Kostenlose Bewertung",
-    s4_p: "Eine kostenlose Preiseinschätzung, wenn wir den Verkauf übernehmen."
+    s4_p: "Kostenlose Preiseinschätzung, wenn wir den späteren Verkauf übernehmen."
   },
   re: {
     intro: "Projektentwicklung ist die Kernkompetenz von DRP Group: ein Projekt von Grund auf zu entwickeln. Kunden können eng mit den Architekten und Ingenieuren zusammenarbeiten. Da Bauland in Luxemburg knapp ist, sind Renovierung und Umbau ebenso wichtig wie Neubau.",
