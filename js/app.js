@@ -225,7 +225,7 @@
       '<li><a href="services.html"' + current("services") + ">" + esc(t("nav.services")) + "</a></li>";
     $("#header").innerHTML =
       '<header class="site-header"><div class="wrap">' +
-      '<a class="logo" href="index.html"><img src="assets/logo-drp-group.png" width="77" height="46" alt="' + esc(t("common.logo_alt")) + '"></a>' +
+      '<a class="logo" href="index.html"><img src="' + esc(D.site.logo || "assets/logo-drp-group.png") + '" width="77" height="46" alt="' + esc(t("common.logo_alt")) + '"></a>' +
       '<nav class="nav" aria-label="Main"><ul>' +
       '<li class="has-sub"><button type="button" class="nav-toggle" aria-expanded="false" aria-controls="sub-activities">' + esc(t("nav.activities")) + ' ▾</button>' +
       '<ul class="sub" id="sub-activities">' + subs + "</ul></li>" +
@@ -236,7 +236,7 @@
       '<button type="button" class="menu-btn" aria-expanded="false" aria-controls="mobile-menu">' + esc(t("common.menu")) + '<span class="bars" aria-hidden="true"></span></button>' +
       "</div></div></header>" +
       '<div class="mobile-menu" id="mobile-menu" role="dialog" aria-modal="true" aria-label="' + esc(t("common.menu")) + '">' +
-      '<div class="mobile-menu__top"><a class="logo" href="index.html"><img src="assets/logo-drp-group.png" width="77" height="46" alt="' + esc(t("common.logo_alt")) + '"></a>' +
+      '<div class="mobile-menu__top"><a class="logo" href="index.html"><img src="' + esc(D.site.logo || "assets/logo-drp-group.png") + '" width="77" height="46" alt="' + esc(t("common.logo_alt")) + '"></a>' +
       '<button type="button" class="menu-btn" data-close>' + esc(t("common.close")) + "</button></div>" +
       '<nav aria-label="Mobile"><ul>' +
       NAV.map(function (n) { return '<li><a href="' + n[1] + '"' + current(n[0]) + ">" + esc(t(n[2])) + "</a></li>"; }).join("") +
@@ -333,7 +333,7 @@
   /* Seitenkopf wie auf der alten Website: Foto, darüber weißer Kasten mit Logo | Linie | Überschrift */
   function pageHead(src, heading, sub) {
     return '<section class="page-head"><div class="page-head__img">' + (src ? '<img src="' + esc(src) + '" alt="" fetchpriority="high">' : ph()) + "</div>" +
-      '<div class="page-head__box"><img class="page-head__logo" src="assets/logo-drp-group.png" width="120" height="72" alt="">' +
+      '<div class="page-head__box"><img class="page-head__logo" src="' + esc(D.site.logo || "assets/logo-drp-group.png") + '" width="120" height="72" alt="">' +
       '<span class="page-head__rule" aria-hidden="true"></span><div class="page-head__text">' +
       (sub ? '<span class="eyebrow">' + esc(sub) + "</span>" : "") + "<h1>" + esc(heading) + "</h1></div></div></section>";
   }
@@ -688,7 +688,7 @@
     if (b.id === "real-estate") {
       html += intro(t("re.intro")) + servicesSection(services("re", 3)) +
         '<section class="section section--off"><div class="wrap"><div class="split">' +
-        '<div><span class="eyebrow">' + esc(t("page.before_after")) + '</span><h2 class="h-section">' + esc(t("re.s1_t")) + "</h2><p class=\"muted\" style=\"margin-top:16px\">" + esc(t("re.ba_text")) + "</p></div>" +
+        '<div><span class="eyebrow">' + esc(t("page.before_after")) + '</span><h2 class="h-section">' + esc(t("re.s1_t")) + "</h2></div>" +
         beforeAfter(D.avant_apres[0]) + "</div></div></section>";
     }
     if (b.id === "senses") html += sensesBody();
@@ -716,8 +716,8 @@
     return '<section class="section arch-gal-sec" aria-labelledby="h-arch-gal"><div class="wrap">' +
       '<div class="section-head"><div><span class="eyebrow">' + esc(t("arch.film_eyebrow", { n: a.photos.length })) + '</span><h2 class="h-section" id="h-arch-gal">' + esc(t("arch.film_title")) + "</h2></div>" +
       '<a class="btn" href="' + esc(site) + '" target="_blank" rel="noopener">' + esc(t("arch.visit")) + '<span class="visually-hidden"> (' + esc(t("common.opens_new")) + ")</span></a></div>" +
-      (a.film ? '<div class="arch-film-v"><video muted loop playsinline preload="none" poster="' + esc(a.film.poster) + '" aria-label="' + esc(t("arch.film_label")) + '">' +
-        '<source src="' + esc(a.film.webm) + '" type="video/webm"><source src="' + esc(a.film.mp4) + '" type="video/mp4"></video>' +
+      (a.film && a.film.mp4 ? '<div class="arch-film-v"><video muted loop playsinline preload="none" poster="' + esc(a.film.poster) + '" aria-label="' + esc(t("arch.film_label")) + '">' +
+        (a.film.webm ? '<source src="' + esc(a.film.webm) + '" type="video/webm">' : "") + '<source src="' + esc(a.film.mp4) + '"' + (/^blob:/.test(a.film.mp4) ? "" : ' type="video/mp4"') + "></video>" +
         '<button type="button" class="arch-film-v__toggle" aria-pressed="false">' + esc(t("arch.film_pause")) + "</button></div>" : "") +
       '<ul class="arch-wall">' + a.photos.map(function (ph, k) {
         return '<li style="--r:' + ph.ratio + '"><button type="button" class="arch-tile" data-k="' + k + '" aria-label="' + esc(t("detail.photo_n", { n: k + 1 })) + '">' +
@@ -1187,20 +1187,23 @@
     hi.alt = t("home.hero_alt");
     $(".hero__scroll").setAttribute("aria-label", t("home.scroll"));
     $(".hero__scroll span").textContent = t("home.scroll");
-    if (D.site.hero_image && D.site.hero_image !== "assets/hero/hero.jpg") { // im Admin ersetzt
-      if (hi.getAttribute("src") !== D.site.hero_image) { hi.removeAttribute("srcset"); hi.src = D.site.hero_image; }
-      $$("video", m).forEach(function (v) { v.remove(); }); m.classList.remove("has-video");
-      return;
-    }
-    if (REDUCED || m.dataset.videoTried) return;
-    m.dataset.videoTried = "1";
-    if (document.readyState !== "complete") { window.addEventListener("load", function () { delete m.dataset.videoTried; initHero(); }, { once: true }); return; }
+    // im Admin ersetzt: neues Foto ohne neues Video → nur das Foto; Video entfernt → nur das Foto
+    var imgNew = D.site.hero_image && D.site.hero_image !== "assets/hero/hero.jpg";
+    var vidNew = D.site.hero_video_mp4 !== "assets/hero/hero.mp4";
+    if (imgNew && hi.getAttribute("src") !== D.site.hero_image) { hi.removeAttribute("srcset"); hi.src = D.site.hero_image; }
+    var key = (D.site.hero_video_webm || "") + "|" + (D.site.hero_video_mp4 || "");
+    if ((imgNew && !vidNew) || key === "|") { $$("video", m).forEach(function (v) { v.remove(); }); m.classList.remove("has-video"); delete m.dataset.videoKey; return; }
+    if (REDUCED || m.dataset.videoKey === key) return;
+    $$("video", m).forEach(function (v) { v.remove(); }); m.classList.remove("has-video");
+    m.dataset.videoKey = key;
+    if (document.readyState !== "complete") { window.addEventListener("load", function () { delete m.dataset.videoKey; initHero(); }, { once: true }); return; }
     // Video-Slot: liegt assets/hero/hero.webm oder .mp4 vor, ersetzt es das Foto.
     var v = document.createElement("video");
     v.muted = true; v.loop = true; v.playsInline = true; v.autoplay = true; v.preload = "auto";
     v.setAttribute("aria-hidden", "true"); // kein Poster: das Foto liegt darunter, bis das Video läuft
     [[D.site.hero_video_webm, "video/webm"], [D.site.hero_video_mp4, "video/mp4"]].forEach(function (s) {
-      var src = document.createElement("source"); src.src = s[0]; src.type = s[1]; v.appendChild(src);
+      if (!s[0]) return;
+      var src = document.createElement("source"); src.src = s[0]; if (!/^blob:/.test(s[0])) src.type = s[1]; v.appendChild(src);
     });
     v.addEventListener("playing", function () { m.classList.add("has-video"); });
     $$("source", v).pop().addEventListener("error", function () { v.remove(); });
@@ -1213,6 +1216,7 @@
     cleanups.forEach(function (fn) { try { fn(); } catch (e) { /* ignore */ } });
     cleanups = [];
     document.documentElement.lang = lang;
+    var fav = $('link[rel="icon"]'); if (fav && D.site.logo && fav.getAttribute("href") !== D.site.logo) fav.href = D.site.logo;
     var metaKey = { home: "home", biens: "properties", bien: "properties", projets: "projects", projet: "projects", carte: "map", durabilite: "sustainability",
       estimation: "valuation", about: "about", team: "team", membre: "team", contact: "contact", services: "services", notfound: "notfound", bereich: "home" }[PAGE];
     document.title = t("meta." + metaKey);

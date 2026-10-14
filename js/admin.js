@@ -313,7 +313,10 @@
     var a = e.target.closest('a[href]');
     if (a) e.preventDefault();
     if (e.target.closest('.kx-text')) { select(e.target); return; }
-    var img = e.target.closest('img') || (e.target.closest('.hero__media') && $('.hero__media img')); // Startseite: Video liegt über dem Foto
+    if (e.target.closest('.hero') && !e.target.closest('.hero__scroll')) { e.preventDefault(); heroSheet(); return; } // Startseite oben: Foto oder Video (Verlauf liegt darüber)
+    var vid = e.target.closest('.arch-film-v, #g-main video, video');
+    if (vid) { var spec = videoSpec(vid); if (spec) { e.preventDefault(); e.stopPropagation(); videoSheet(spec); return; } }
+    var img = e.target.closest('img');
     if (img && !e.target.closest('.leaflet-container')) { e.preventDefault(); e.stopPropagation(); select(img); imageSheet(img); return; }
     if (a) { select(e.target); return; }
     select(e.target);
@@ -443,7 +446,9 @@
         var done = function (b, ext) { res({ blob: b, ext: ext, ratio: Math.round(w / h * 1000) / 1000 }); };
         cv.toBlob(function (b) {
           if (b && b.type === 'image/webp') return done(b, 'webp');
-          cv.toBlob(function (j) { j ? done(j, 'jpg') : rej(new Error('encode')); }, 'image/jpeg', 0.82);
+          // ohne WebP (Safari): PNG bleibt PNG (Logo mit transparentem Hintergrund), Fotos werden JPG
+          if (file.type === 'image/png') cv.toBlob(function (pn) { pn ? done(pn, 'png') : rej(new Error('encode')); }, 'image/png');
+          else cv.toBlob(function (j) { j ? done(j, 'jpg') : rej(new Error('encode')); }, 'image/jpeg', 0.82);
         }, 'image/webp', 0.8);
       };
       img.onerror = function () { URL.revokeObjectURL(url); rej(new Error('format')); };
@@ -502,6 +507,70 @@
     };
     var del = $('[data-a=del]', w);
     if (del) del.onclick = function () { closeSheet(); change(function () { getP(C.data, inList.list).splice(inList.i, 1); }); toast('Bild gelöscht'); };
+  }
+
+  /* ------------------------------------------------------------ Videos (Startseite, Projekt-Rundgang, Film DRP Architecture) */
+  function itemIdx() { var id = A.param('id'), i = -1; (C.data.items || []).forEach(function (x, k) { if (x.id === id) i = k; }); return i; }
+  function videoSpec(el) {
+    if (el.closest('.arch-film-v')) return { title: 'Film DRP Architecture', mp4: 'architecture.film.mp4', webm: 'architecture.film.webm', poster: 'architecture.film.poster' };
+    var i = itemIdx();
+    if (el.closest('#g-main') && i > -1) return { title: 'Video zum Projekt', mp4: 'items.' + i + '.video', poster: 'items.' + i + '.video_poster' };
+    return null;
+  }
+  var HERO_VIDEO = { title: 'Video auf der Startseite', mp4: 'site.hero_video_mp4', webm: 'site.hero_video_webm' };
+  function heroSheet() {
+    var w = sheet('Startseite oben', '<div class="kx-list">' +
+      '<button class="kx-li" data-h="img">🖼 Foto ändern</button><button class="kx-li" data-h="vid">🎬 Video ändern oder entfernen</button></div>' +
+      '<p class="kx-hint" style="margin-top:12px!important">Das Video (Tag ↔ Nacht) liegt über dem Foto. Ein neues Foto ohne neues Video wird allein gezeigt.</p>', { noFocus: true });
+    $('[data-h=img]', w).onclick = function () { closeSheet(); imageSheet($('.hero__media img')); };
+    $('[data-h=vid]', w).onclick = function () { closeSheet(); videoSheet(HERO_VIDEO); };
+  }
+  function posterFrom(file) { // erstes Bild des Videos als Vorschaubild
+    return new Promise(function (res) {
+      var v = document.createElement('video'), url = URL.createObjectURL(file), done = false;
+      var finish = function (b) { if (done) return; done = true; URL.revokeObjectURL(url); res(b); };
+      v.muted = true; v.playsInline = true; v.preload = 'auto'; v.src = url;
+      v.addEventListener('loadeddata', function () { v.currentTime = Math.min(0.2, (v.duration || 1) / 2); });
+      v.addEventListener('seeked', function () {
+        try {
+          var cv = document.createElement('canvas'), sc = Math.min(1, 1600 / v.videoWidth);
+          cv.width = Math.round(v.videoWidth * sc); cv.height = Math.round(v.videoHeight * sc);
+          cv.getContext('2d').drawImage(v, 0, 0, cv.width, cv.height);
+          cv.toBlob(function (b) { finish(b); }, 'image/jpeg', 0.82);
+        } catch (e) { finish(null); }
+      });
+      v.addEventListener('error', function () { finish(null); });
+      setTimeout(function () { finish(null); }, 8000);
+    });
+  }
+  function videoSheet(spec) {
+    var cur = getP(C.data, spec.mp4);
+    var w = sheet(spec.title, '<div class="kx-form"><div class="kx-prev">' + (cur ? '<video src="' + esc(S.imageUrl(cur)) + '" muted controls playsinline style="max-width:100%;max-height:260px"></video>' : '<p class="kx-hint">Noch kein Video.</p>') + '</div>' +
+      '<div class="kx-row kx-pick"><label class="kx-btn kx-primary">📁 Video aus Galerie<input type="file" accept="video/mp4,video/webm,video/quicktime,video/*" hidden></label>' +
+      '<label class="kx-btn kx-primary">🎥 Video aufnehmen<input type="file" accept="video/*" capture="environment" hidden></label></div>' +
+      '<p class="kx-hint">Am besten kurze Clips (unter 50 MB, MP4). Das Video wird nicht verkleinert; es läuft stumm und in Schleife.</p>' +
+      '<div class="kx-row">' + (cur ? '<button class="kx-btn kx-ghost kx-red" data-a="del">Video entfernen</button>' : '') + '<button class="kx-btn kx-primary" data-a="ok">Fertig</button></div></div>', { noFocus: true });
+    $$('input[type=file]', w).forEach(function (inp) {
+      inp.onchange = function () {
+        var f = inp.files[0]; if (!f) return;
+        var go = function () {
+          working(true);
+          var ext = (f.name.split('.').pop() || 'mp4').toLowerCase().replace(/[^a-z0-9]/g, '') || 'mp4';
+          Promise.all([S.uploadImage(f, slug(spec.title) + '-' + Math.random().toString(36).slice(2, 7) + '.' + ext), spec.poster ? posterFrom(f) : null]).then(function (r) {
+            return (r[1] ? S.uploadImage(r[1], slug(spec.title) + '-vorschau-' + Math.random().toString(36).slice(2, 7) + '.jpg') : Promise.resolve(null)).then(function (pp) { return [r[0], pp]; });
+          }).then(function (r) {
+            working(false);
+            change(function () { setP(C.data, spec.mp4, r[0]); if (spec.webm) setP(C.data, spec.webm, null); if (spec.poster && r[1]) setP(C.data, spec.poster, r[1]); });
+            closeSheet(); toast('Video ersetzt');
+          }).catch(function () { working(false); toast('Das Video konnte nicht gespeichert werden (zu groß für den Browser-Speicher?).', 6000); });
+        };
+        if (f.size > 80 * 1024 * 1024) confirmBox('Großes Video', 'Das Video ist ' + Math.round(f.size / 1048576) + ' MB groß und lädt für Besucher langsam. Trotzdem verwenden?', 'Trotzdem verwenden').then(function (ok) { if (ok) go(); });
+        else go();
+      };
+    });
+    $('[data-a=ok]', w).onclick = closeSheet;
+    var del = $('[data-a=del]', w);
+    if (del) del.onclick = function () { closeSheet(); change(function () { setP(C.data, spec.mp4, null); if (spec.webm) setP(C.data, spec.webm, null); }); toast('Video entfernt'); };
   }
 
   /* ------------------------------------------------------------ Bilder verwalten (Galerie eines Objekts, Fotowand) */
@@ -565,6 +634,7 @@
         var g = $('.gallery__main') || $('#main section, #main .wrap');
         chip(g, '🖼 Bilder verwalten (' + C.data.items[i].images.length + ')', function () { galleryManager('items.' + i + '.images', C.data.items[i].titre); }, 'kx-chip-gal');
         chip($('#main h1') && $('#main h1').parentElement, '✎ Angaben zu diesem Objekt', function () { itemSheet(i); });
+        if (A.page === 'projet') chip($('.gallery') || g, '🎬 ' + (C.data.items[i].video ? 'Video ändern' : 'Video hinzufügen'), function () { videoSheet({ title: 'Video zum Projekt', mp4: 'items.' + i + '.video', poster: 'items.' + i + '.video_poster' }); }, 'kx-chip-top');
       }
     }
     if (A.page === 'membre' && id) {
@@ -619,7 +689,7 @@
   function loadPlaces() {
     if (window.DRP_PLACES) return Promise.resolve(window.DRP_PLACES);
     return placesP || (placesP = new Promise(function (res) {
-      var sc = document.createElement('script'); sc.src = 'js/places.js?v=20261014c'; sc.onload = function () { res(window.DRP_PLACES || []); }; sc.onerror = function () { res([]); };
+      var sc = document.createElement('script'); sc.src = 'js/places.js?v=20261014d'; sc.onload = function () { res(window.DRP_PLACES || []); }; sc.onerror = function () { res([]); };
       document.head.appendChild(sc);
     }));
   }
@@ -660,7 +730,7 @@
       marker = L.marker([a, b], { draggable: true, icon: A.markerIcon(L, [it]), keyboard: false }).addTo(map);
       marker.on('dragend', function () { var p = marker.getLatLng(); setPos(p.lat, p.lng, 'Position von Hand gesetzt.', false); });
       map.on('click', function (e) { setPos(e.latlng.lat, e.latlng.lng, 'Position von Hand gesetzt.', false); });
-      setTimeout(function () { map.invalidateSize(); }, 50);
+      setTimeout(function () { if (document.body.contains(el)) map.invalidateSize(); }, 50); // Formular evtl. schon zu
     });
   }
   function teamSheet(i) {
@@ -855,7 +925,8 @@
   function helpSheet() {
     sheet('Kurzanleitung', '<ol class="kx-help">' +
       '<li><b>Text ändern:</b> Text antippen und lostippen. Gilt für die oben gewählte Sprache – für eine andere Sprache einfach die Sprache wechseln.</li>' +
-      '<li><b>Bild ändern:</b> Bild antippen → „Foto aus Galerie“ oder „Foto aufnehmen“.</li>' +
+      '<li><b>Bild ändern:</b> Bild antippen → „Foto aus Galerie“ oder „Foto aufnehmen“. Das gilt auch für das Logo.</li>' +
+      '<li><b>Videos:</b> Video antippen (Startseite oben, Projekt-Rundgang, Film bei DRP Architecture) → austauschen oder entfernen.</li>' +
       '<li><b>Bilder eines Objekts oder der Fotowand:</b> Knopf „Bilder verwalten“ – hinzufügen, löschen, Reihenfolge.</li>' +
       '<li><b>Objekte und Personen:</b> Karte antippen – unten erscheinen ↑ ↓, Angaben, Kopieren, Löschen.</li>' +
       '<li><b>Neues Objekt / neue Person:</b> unter „Mehr“ oder „Seiten“. Die Kartenposition wird beim Eintippen des Ortes automatisch gesetzt.</li>' +
