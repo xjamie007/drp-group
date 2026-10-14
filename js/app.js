@@ -180,6 +180,13 @@
   /* Fehlende Bilddatei → Platzhalter, damit das Layout steht */
   document.addEventListener("error", function (e) {
     var el = e.target;
+    // kurzer Netzaussetzer: einmal neu laden, erst dann Platzhalter
+    if (el.tagName === "IMG" && !el.dataset.retry && el.getAttribute("src")) {
+      el.dataset.retry = "1";
+      var src = el.getAttribute("src");
+      setTimeout(function () { el.removeAttribute("srcset"); el.src = src + (src.indexOf("?") < 0 && !/^(blob|data):/.test(src) ? "?r=1" : ""); }, 800);
+      return;
+    }
     if (el.tagName === "IMG" && el.parentNode && el.parentNode.classList.contains("ratio")) el.outerHTML = ph();
     if (el.tagName === "IMG" && el.closest(".hero__media")) el.style.visibility = "hidden";
   }, true);
