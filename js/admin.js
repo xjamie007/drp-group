@@ -689,7 +689,7 @@
   function loadPlaces() {
     if (window.DRP_PLACES) return Promise.resolve(window.DRP_PLACES);
     return placesP || (placesP = new Promise(function (res) {
-      var sc = document.createElement('script'); sc.src = 'js/places.js?v=20261014d'; sc.onload = function () { res(window.DRP_PLACES || []); }; sc.onerror = function () { res([]); };
+      var sc = document.createElement('script'); sc.src = 'js/places.js?v=20261014e'; sc.onload = function () { res(window.DRP_PLACES || []); }; sc.onerror = function () { res([]); };
       document.head.appendChild(sc);
     }));
   }

@@ -686,10 +686,12 @@
 
     if (b.id === "luxembourg") html += intro(t("lux.intro")) + servicesSection(services("lux", 4));
     if (b.id === "real-estate") {
+      var ba = (D.avant_apres || [])[0];
       html += intro(t("re.intro")) + servicesSection(services("re", 3)) +
-        '<section class="section section--off"><div class="wrap"><div class="split">' +
+        // Vorher/Nachher nur mit echten Fotos (data.js → avant_apres), sonst kein Block mit „Foto folgt“
+        (ba && ba.avant && ba.apres ? '<section class="section section--off"><div class="wrap"><div class="split">' +
         '<div><span class="eyebrow">' + esc(t("page.before_after")) + '</span><h2 class="h-section">' + esc(t("re.s1_t")) + "</h2></div>" +
-        beforeAfter(D.avant_apres[0]) + "</div></div></section>";
+        beforeAfter(ba) + "</div></div></section>" : "");
     }
     if (b.id === "senses") html += sensesBody();
     if (b.id === "architecture") {
