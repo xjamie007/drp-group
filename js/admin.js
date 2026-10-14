@@ -26,7 +26,7 @@
   function strip(s) { return String(s).replace(STRIP, ''); }
   function fresh() {
     var c = window.DRP_CONTENT ? clone(window.DRP_CONTENT) : {};
-    return { version: 1, data: c.data || clone(ST.original.data), i18n: c.i18n || {}, seo: c.seo || {}, alts: c.alts || {} };
+    return { version: 1, data: c.data || clone(ST.original.data), i18n: c.i18n || {}, seo: c.seo || {}, alts: c.alts || {}, trash: c.trash || [] };
   }
 
   /* Seite, für die Titel/Beschreibung gelten (z. B. „bien:apartment-01…“) */
@@ -417,8 +417,12 @@
       toast('Kopie eingefügt – jetzt anpassen');
     }
     if (c === 'del') {
-      confirmBox(LABEL[sel.list] + ' löschen', 'Soll das wirklich gelöscht werden? (Mit „Rückgängig“ holen Sie es zurück.)', 'Löschen', true).then(function (ok) {
-        if (ok) { sel = null; change(function () { list.splice(i, 1); }); showCtx(); }
+      if (sel.list === 'items') { deleteItem(it.id); return; }
+      confirmBox(LABEL[sel.list] + ' löschen', sel.list === 'team' ? 'Die Person kommt in den Papierkorb (unter „Mehr“) und lässt sich dort wiederherstellen.' : 'Soll das wirklich gelöscht werden? (Mit „Rückgängig“ holen Sie es zurück.)', 'Löschen', true).then(function (ok) {
+        if (!ok) return;
+        var listName = sel.list; sel = null;
+        change(function () { var x = list.splice(i, 1)[0]; if (listName === 'team') C.trash.unshift({ kind: 'team', obj: x, index: i, at: Date.now() }); });
+        showCtx();
       });
     }
   }
@@ -615,7 +619,7 @@
   function loadPlaces() {
     if (window.DRP_PLACES) return Promise.resolve(window.DRP_PLACES);
     return placesP || (placesP = new Promise(function (res) {
-      var sc = document.createElement('script'); sc.src = 'js/places.js?v=20261014b'; sc.onload = function () { res(window.DRP_PLACES || []); }; sc.onerror = function () { res([]); };
+      var sc = document.createElement('script'); sc.src = 'js/places.js?v=20261014c'; sc.onload = function () { res(window.DRP_PLACES || []); }; sc.onerror = function () { res([]); };
       document.head.appendChild(sc);
     }));
   }
@@ -700,11 +704,13 @@
     var html = '<h3 class="kx-h3">Seiten</h3><div class="kx-list">' + PAGES.map(function (p) { return li(p[0], p[1], LOCKED.indexOf(p[0]) < 0 ? 'data-dp="' + p[0] + '"' : ''); }).join('') + '</div>' +
       '<h3 class="kx-h3">Projekte</h3><div class="kx-list">' + items('projet') + '</div>' +
       '<h3 class="kx-h3">Immobilien</h3><div class="kx-list">' + items('bien') + '</div>' +
-      '<div class="kx-row" style="margin-top:12px"><button class="kx-btn kx-ghost" data-n="bien">+ Neue Immobilie</button><button class="kx-btn kx-ghost" data-n="projet">+ Neues Projekt</button></div>';
+      '<div class="kx-row" style="margin-top:12px"><button class="kx-btn kx-ghost" data-n="bien">+ Neue Immobilie</button><button class="kx-btn kx-ghost" data-n="projet">+ Neues Projekt</button></div>' +
+      '<button class="kx-btn kx-ghost kx-block" data-trash style="margin-top:10px">🗑 Papierkorb – Gelöschtes wiederherstellen (' + trashCount() + ')</button>';
     var w = sheet('Seite öffnen', html, { noFocus: true });
     $$('[data-p]', w).forEach(function (b) { b.onclick = function () { closeSheet(); go(b.getAttribute('data-p')); }; });
     $$('[data-n]', w).forEach(function (b) { b.onclick = function () { newItemSheet(b.getAttribute('data-n')); }; });
     $$('[data-dp]', w).forEach(function (b) { b.onclick = function () { togglePage(b.getAttribute('data-dp')); }; });
+    $('[data-trash]', w).onclick = trashSheet;
     $$('[data-di]', w).forEach(function (b) {
       b.onclick = function () {
         var id = b.getAttribute('data-di'), here = A.param('id') === id, it = C.data.items.filter(function (x) { return x.id === id; })[0];
@@ -747,23 +753,67 @@
     if (i < 0) return;
     var it = C.data.items[i], kids = C.data.items.filter(function (x) { return x.projet === id; }).length;
     confirmBox((it.type === 'projet' ? 'Projekt' : 'Immobilie') + ' löschen', '„' + esc(strip(it.titre)) + '“ und die zugehörige Seite werden gelöscht.' +
-      (kids ? ' Die ' + kids + ' zugehörigen Wohnungen bleiben als einzelne Immobilien bestehen.' : '') + ' (Mit „Rückgängig“ holen Sie es zurück, solange Sie die Seite nicht verlassen.)', 'Löschen', true).then(function (ok) {
+      (kids ? ' Die ' + kids + ' zugehörigen Wohnungen bleiben als einzelne Immobilien bestehen.' : '') + ' Es kommt in den Papierkorb (unter „Mehr“ und „Seiten“) und lässt sich dort wiederherstellen.', 'Löschen', true).then(function (ok) {
       if (!ok) return;
       sel = null;
       change(function () {
-        C.data.items.splice(i, 1);
+        var kidIds = C.data.items.filter(function (x) { return x.projet === id; }).map(function (x) { return x.id; });
+        C.trash.unshift({ kind: 'item', obj: C.data.items.splice(i, 1)[0], index: i, kids: kidIds, at: Date.now() });
         C.data.items.forEach(function (x) { if (x.projet === id) x.projet = null; });
       }, !after);
       showCtx();
       if (after) save().then(after);
     });
   }
+  /* Papierkorb: gelöschte Projekte, Immobilien, Personen und Seiten – wiederherstellen oder endgültig löschen */
+  var KIND = { item: function (o) { return o.type === 'projet' ? 'Projekt' : 'Immobilie'; }, team: function () { return 'Person'; } };
+  function trashCount() { return C.trash.length + (C.data.site.hidden_pages || []).length; }
+  function trashHtml() {
+    var date = function (t) { var d = new Date(t); return d.toLocaleDateString('de-LU') + ' ' + d.toLocaleTimeString('de-LU', { hour: '2-digit', minute: '2-digit' }); };
+    var rows = (C.data.site.hidden_pages || []).map(function (f) {
+      var name = (PAGES.filter(function (p) { return p[0] === f; })[0] || [f, f])[1];
+      return '<div class="kx-trow"><div><b>' + esc(name) + '</b><small>Seite</small></div><button class="kx-btn kx-primary" data-rp="' + esc(f) + '">↺ Wiederherstellen</button></div>';
+    }).concat(C.trash.map(function (t, k) {
+      return '<div class="kx-trow"><div><b>' + esc(strip(t.obj.titre || t.obj.nom || '')) + '</b><small>' + KIND[t.kind](t.obj) + ' · gelöscht am ' + date(t.at) + '</small></div>' +
+        '<button class="kx-btn kx-primary" data-rt="' + k + '">↺ Wiederherstellen</button><button class="kx-btn kx-ghost kx-red" data-xt="' + k + '" aria-label="Endgültig löschen">🗑</button></div>';
+    }));
+    return rows.length ? rows.join('') : '<p class="kx-hint">Der Papierkorb ist leer.</p>';
+  }
+  function trashSheet() {
+    commitEditing();
+    var w = sheet('Papierkorb', '<div></div>', { noFocus: true });
+    function draw() {
+      var body = $('.kx-sheet-body', w);
+      body.innerHTML = '<p class="kx-hint" style="margin-bottom:12px!important">Gelöschte Seiten, Projekte, Immobilien und Personen. „Wiederherstellen“ holt sie zurück, 🗑 löscht sie endgültig.</p><div class="kx-trash">' + trashHtml() + '</div>';
+      $$('[data-rp]', body).forEach(function (b) { b.onclick = function () { var f = b.getAttribute('data-rp'), hp = C.data.site.hidden_pages; change(function () { hp.splice(hp.indexOf(f), 1); }); save(); draw(); toast('Seite wiederhergestellt'); }; });
+      $$('[data-rt]', body).forEach(function (b) { b.onclick = function () { restore(+b.getAttribute('data-rt')); save(); draw(); }; });
+      $$('[data-xt]', body).forEach(function (b) {
+        b.onclick = function () {
+          var k = +b.getAttribute('data-xt');
+          confirmBox('Endgültig löschen', '„' + esc(strip(C.trash[k].obj.titre || C.trash[k].obj.nom)) + '“ lässt sich danach nicht mehr wiederherstellen.', 'Endgültig löschen', true).then(function (ok) {
+            if (ok) { change(function () { C.trash.splice(k, 1); }, false); save(); } trashSheet();
+          });
+        };
+      });
+    }
+    draw();
+  }
+  function restore(k) {
+    var t = C.trash[k], list = t.kind === 'item' ? C.data.items : C.data.team, o = clone(t.obj), base = o.id, n = 2;
+    while (list.some(function (x) { return x.id === o.id; })) o.id = base + '-' + n++; // inzwischen gleiche Adresse vergeben
+    change(function () {
+      list.splice(Math.min(t.index, list.length), 0, o);
+      (t.kids || []).forEach(function (kid) { list.forEach(function (x) { if (x.id === kid && !x.projet) x.projet = o.id; }); });
+      C.trash.splice(k, 1);
+    });
+    toast(KIND[t.kind](o) + ' „' + strip(o.titre || o.nom) + '“ wiederhergestellt');
+  }
   var LOCKED = ['index.html', '404.html'];
   function togglePage(file) {
     var hp = C.data.site.hidden_pages = C.data.site.hidden_pages || [], gone = hp.indexOf(file) > -1;
     var name = (PAGES.filter(function (p) { return p[0] === file; })[0] || [file, file])[1];
     confirmBox(gone ? 'Seite wiederherstellen' : 'Seite löschen', gone ? '„' + esc(name) + '“ ist danach wieder sichtbar und überall verlinkt.'
-      : '„' + esc(name) + '“ wird für Besucher entfernt, alle Links darauf verschwinden aus Menü und Footer. Unter „Seiten“ können Sie sie jederzeit wiederherstellen.',
+      : '„' + esc(name) + '“ wird für Besucher entfernt, alle Links darauf verschwinden aus Menü und Footer. Im Papierkorb (unter „Mehr“ und „Seiten“) können Sie sie jederzeit wiederherstellen.',
       gone ? 'Wiederherstellen' : 'Löschen', !gone).then(function (ok) {
       if (!ok) return;
       change(function () { if (gone) hp.splice(hp.indexOf(file), 1); else hp.push(file); });
@@ -779,6 +829,7 @@
       '<button class="kx-li" data-m="newb">➕ Neue Immobilie</button>' +
       '<button class="kx-li" data-m="newp">➕ Neues Projekt</button>' +
       '<button class="kx-li" data-m="newt">➕ Neue Person im Team</button>' +
+      '<button class="kx-li" data-m="trash">🗑 Papierkorb – Gelöschtes wiederherstellen (' + trashCount() + ')</button>' +
       '<button class="kx-li" data-m="help">❓ Kurzanleitung</button>' +
       (isItem ? '<button class="kx-li" data-m="resetp">↺ Dieses Objekt auf Original zurücksetzen</button><button class="kx-li kx-red" data-m="delitem">🗑 Dieses Objekt löschen</button>' : '') +
       (isPage ? '<button class="kx-li kx-red" data-m="delpage">' + (A.isHidden(file) ? '↺ Diese Seite wiederherstellen' : '🗑 Diese Seite löschen') + '</button>' : '') +
@@ -792,6 +843,7 @@
         if (a === 'newp') newItemSheet('projet');
         if (a === 'newt') newTeamSheet();
         if (a === 'help') helpSheet();
+        if (a === 'trash') trashSheet();
         if (a === 'resetp') resetItem(id);
         if (a === 'delitem') { var tp = A.page === 'projet' ? 'projets.html' : 'biens.html'; deleteItem(id, function () { location.href = tp; }); }
         if (a === 'delpage') togglePage(file);
@@ -807,7 +859,7 @@
       '<li><b>Bilder eines Objekts oder der Fotowand:</b> Knopf „Bilder verwalten“ – hinzufügen, löschen, Reihenfolge.</li>' +
       '<li><b>Objekte und Personen:</b> Karte antippen – unten erscheinen ↑ ↓, Angaben, Kopieren, Löschen.</li>' +
       '<li><b>Neues Objekt / neue Person:</b> unter „Mehr“ oder „Seiten“. Die Kartenposition wird beim Eintippen des Ortes automatisch gesetzt.</li>' +
-      '<li><b>Löschen:</b> Seiten, Projekte und Immobilien unter „Seiten“ (🗑) oder auf der Seite selbst unter „Mehr“. Gelöschte Seiten lassen sich dort wiederherstellen (↺).</li>' +
+      '<li><b>Löschen:</b> Seiten, Projekte und Immobilien unter „Seiten“ (🗑) oder auf der Seite selbst unter „Mehr“. Alles Gelöschte liegt im <b>Papierkorb</b> (unter „Mehr“ und unten in „Seiten“) und lässt sich dort wiederherstellen.</li>' +
       '<li><b>Google:</b> Titel, Beschreibung und Bildbeschreibungen pro Seite und Sprache.</li>' +
       '<li><b>Andere Seite bearbeiten:</b> „Seiten“.</li>' +
       '<li><b>Fertig?</b> Auf <b>Speichern</b> tippen. Vertippt? <b>Rückgängig</b>.</li></ol>', { noFocus: true });

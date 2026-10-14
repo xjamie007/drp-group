@@ -108,4 +108,9 @@ html.kx-on .rv{opacity:1!important;translate:none!important}
 .kx-map{height:260px;border-radius:12px;overflow:hidden;border:1.5px solid #c9d1db}
 .kx-latlng{justify-content:stretch}
 .kx-latlng>label{flex:1 1 140px}
+.kx-trash{display:flex;flex-direction:column;gap:8px}
+.kx-trow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 12px;border-radius:12px;background:#f3f5f8}
+.kx-trow>div{flex:1 1 200px;display:flex;flex-direction:column;gap:2px}
+.kx-trow small{color:#6b7785;font-size:13px!important}
+.kx-trow .kx-btn{min-height:48px;flex:0 0 auto}
 
