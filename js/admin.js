@@ -581,14 +581,17 @@
     var it = C.data.items[i], l = lang(), desc = it.description || {};
     var w = sheet(it.type === 'projet' ? 'Projekt – Angaben' : 'Immobilie – Angaben', '<form class="kx-form">' +
       field('Titel', 'titre', it.titre) +
-      field('Ort', 'localite', it.localite) + field('Gemeinde', 'gemeinde', it.gemeinde) +
+      '<label>Ort<input name="localite" list="kx-places" autocomplete="off" value="' + esc(it.localite || '') + '"></label><datalist id="kx-places"></datalist>' +
+      field('Gemeinde', 'gemeinde', it.gemeinde) +
       '<label>Stand<select name="statut">' + STATUS.map(function (s) { return '<option value="' + s + '"' + (s === it.statut ? ' selected' : '') + '>' + esc(strip(A.t('status.' + s))) + '</option>'; }).join('') + '</select></label>' +
       (it.type === 'bien' ? field('Preis in €', 'prix', it.prix, 'num', 'leer = „Preis auf Anfrage“') + field('Wohnfläche in m²', 'surface', it.surface, 'num') : field('Anzahl Einheiten', 'unites_total', it.unites_total, 'num')) +
       field('Schlafzimmer', 'chambres', it.chambres, '', 'z. B. 3 oder 2–3') +
       field('Beschreibung (' + l.toUpperCase() + ')', 'desc', (desc[l] || desc.en || []).join ? (desc[l] || desc.en || []).join('\n\n') : (desc[l] || ''), 'area', 'Leerzeile = neuer Absatz') +
       '<label class="kx-check"><input type="checkbox" name="aff"' + (it.a_laffiche ? ' checked' : '') + '> Auf der Startseite unter „Im Fokus“ zeigen (höchstens 3)</label>' +
-      field('Kartenposition – Breite', 'lat', it.lat, 'num', 'Ortsmitte, z. B. aus Google Maps') + field('Kartenposition – Länge', 'lng', it.lng, 'num') +
+      '<div class="kx-mapbox"><span class="kx-lbl2">Position auf der Karte</span><p class="kx-hint" data-pos>Wird beim Eintippen des Ortes automatisch gesetzt (Ortsmitte). Zum Ändern den Punkt verschieben oder in die Karte tippen.</p>' +
+      '<div class="kx-map"></div><div class="kx-row kx-latlng">' + field('Breite', 'lat', it.lat, 'num') + field('Länge', 'lng', it.lng, 'num') + '</div></div>' +
       '<button class="kx-btn kx-primary kx-block" type="submit">Übernehmen</button></form>');
+    mapPicker(w, it);
     $('form', w).onsubmit = function (e) {
       e.preventDefault();
       var f = e.target, n = function (v) { v = String(v).replace(',', '.').trim(); return v === '' ? null : +v; };
@@ -606,6 +609,55 @@
       });
       closeSheet(); toast('Angaben übernommen – bitte Speichern nicht vergessen');
     };
+  }
+  /* Orte (js/places.js, erst bei Bedarf geladen) und Karte im Formular */
+  var placesP = null;
+  function loadPlaces() {
+    if (window.DRP_PLACES) return Promise.resolve(window.DRP_PLACES);
+    return placesP || (placesP = new Promise(function (res) {
+      var sc = document.createElement('script'); sc.src = 'js/places.js?v=20261014b'; sc.onload = function () { res(window.DRP_PLACES || []); }; sc.onerror = function () { res([]); };
+      document.head.appendChild(sc);
+    }));
+  }
+  function norm(x) { return String(x || '').replace(STRIP, '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ''); }
+  function findPlace(list, name) {
+    var n = norm(name); if (!n) return null;
+    return list.filter(function (p) { return p[0].split('|').some(function (x) { return norm(x) === n; }); }).sort(function (a, b) { return a[3] - b[3]; })[0] || null;
+  }
+  function mapPicker(w, it) {
+    var f = $('form', w), lat = f.lat, lng = f.lng, info = $('[data-pos]', w), map = null, marker = null, places = [];
+    function num(v) { v = parseFloat(String(v).replace(',', '.')); return isNaN(v) ? null : v; }
+    function setPos(a, b, msg, pan) {
+      lat.value = a.toFixed(5); lng.value = b.toFixed(5);
+      if (marker) { marker.setLatLng([a, b]); if (pan !== false) map.setView([a, b], Math.max(map.getZoom(), 13)); }
+      if (msg) info.textContent = msg;
+    }
+    loadPlaces().then(function (list) {
+      places = list;
+      $('#kx-places', w).innerHTML = list.filter(function (p) { return p[3] <= 4; }).map(function (p) { return '<option value="' + esc(p[0].split('|')[0]) + '">'; }).join('');
+    });
+    var t = null;
+    function lookup() {
+      clearTimeout(t);
+      t = setTimeout(function () {
+        var p = f.localite.value.trim() ? findPlace(places, f.localite.value) : findPlace(places, f.gemeinde.value); // Gemeinde nur, wenn kein Ort eingetragen
+        if (p) setPos(p[1], p[2], 'Ortsmitte von „' + p[0].split('|')[0] + '“ übernommen. Zum Ändern den Punkt verschieben oder in die Karte tippen.');
+        else if (f.localite.value.trim()) info.textContent = 'Ort nicht gefunden – bitte Schreibweise prüfen oder die Position in der Karte antippen.';
+      }, 250);
+    }
+    f.localite.addEventListener('input', lookup);
+    f.gemeinde.addEventListener('change', function () { if (!findPlace(places, f.localite.value)) lookup(); });
+    [lat, lng].forEach(function (inp) { inp.addEventListener('change', function () { var a = num(lat.value), b = num(lng.value); if (a != null && b != null && marker) { marker.setLatLng([a, b]); map.panTo([a, b]); } }); });
+    A.loadLeaflet().then(function (L) {
+      var el = $('.kx-map', w); if (!el || !document.body.contains(el)) return;
+      var a = num(lat.value) || 49.61, b = num(lng.value) || 6.13;
+      map = A.baseMap(L, el, { scrollWheelZoom: true });
+      map.setView([a, b], num(lat.value) ? 13 : 9);
+      marker = L.marker([a, b], { draggable: true, icon: A.markerIcon(L, [it]), keyboard: false }).addTo(map);
+      marker.on('dragend', function () { var p = marker.getLatLng(); setPos(p.lat, p.lng, 'Position von Hand gesetzt.', false); });
+      map.on('click', function (e) { setPos(e.latlng.lat, e.latlng.lng, 'Position von Hand gesetzt.', false); });
+      setTimeout(function () { map.invalidateSize(); }, 50);
+    });
   }
   function teamSheet(i) {
     var m = C.data.team[i], l = lang(), bio = m.bio || {};
@@ -639,15 +691,26 @@
   function pagesSheet() {
     commitEditing();
     var here = location.pathname.split('/').pop() + location.search;
-    var li = function (href, label) { return '<button class="kx-li' + (here === href || (here === '' && href === 'index.html') ? ' kx-cur' : '') + '" data-p="' + esc(href) + '">' + esc(strip(label)) + '</button>'; };
-    var items = function (type) { return C.data.items.filter(function (x) { return x.type === type; }).map(function (x) { return li(A.url(x), x.titre); }).join(''); };
-    var html = '<h3 class="kx-h3">Seiten</h3><div class="kx-list">' + PAGES.map(function (p) { return li(p[0], p[1]); }).join('') + '</div>' +
+    var li = function (href, label, del) {
+      var gone = !/\?/.test(href) && A.isHidden(href);
+      return '<div class="kx-lirow' + (gone ? ' kx-gone' : '') + '"><button class="kx-li' + (here === href || (here === '' && href === 'index.html') ? ' kx-cur' : '') + '" data-p="' + esc(href) + '">' + esc(strip(label)) + (gone ? ' <small>(gelöscht)</small>' : '') + '</button>' +
+        (del ? '<button class="kx-li kx-del' + (gone ? '' : ' kx-red') + '" ' + del + ' aria-label="' + (gone ? 'Wiederherstellen' : 'Löschen') + ': ' + esc(strip(label)) + '">' + (gone ? '↺' : '🗑') + '</button>' : '') + '</div>';
+    };
+    var items = function (type) { return C.data.items.filter(function (x) { return x.type === type; }).map(function (x) { return li(A.url(x), x.titre, 'data-di="' + esc(x.id) + '"'); }).join(''); };
+    var html = '<h3 class="kx-h3">Seiten</h3><div class="kx-list">' + PAGES.map(function (p) { return li(p[0], p[1], LOCKED.indexOf(p[0]) < 0 ? 'data-dp="' + p[0] + '"' : ''); }).join('') + '</div>' +
       '<h3 class="kx-h3">Projekte</h3><div class="kx-list">' + items('projet') + '</div>' +
       '<h3 class="kx-h3">Immobilien</h3><div class="kx-list">' + items('bien') + '</div>' +
       '<div class="kx-row" style="margin-top:12px"><button class="kx-btn kx-ghost" data-n="bien">+ Neue Immobilie</button><button class="kx-btn kx-ghost" data-n="projet">+ Neues Projekt</button></div>';
     var w = sheet('Seite öffnen', html, { noFocus: true });
     $$('[data-p]', w).forEach(function (b) { b.onclick = function () { closeSheet(); go(b.getAttribute('data-p')); }; });
     $$('[data-n]', w).forEach(function (b) { b.onclick = function () { newItemSheet(b.getAttribute('data-n')); }; });
+    $$('[data-dp]', w).forEach(function (b) { b.onclick = function () { togglePage(b.getAttribute('data-dp')); }; });
+    $$('[data-di]', w).forEach(function (b) {
+      b.onclick = function () {
+        var id = b.getAttribute('data-di'), here = A.param('id') === id, it = C.data.items.filter(function (x) { return x.id === id; })[0];
+        deleteItem(id, here ? function () { location.href = it.type === 'projet' ? 'projets.html' : 'biens.html'; } : null);
+      };
+    });
   }
   function seoSheet() {
     commitEditing();
@@ -679,15 +742,46 @@
       closeSheet(); toast('Angaben für Google übernommen – bitte Speichern nicht vergessen');
     };
   }
+  function deleteItem(id, after) {
+    var i = -1; C.data.items.forEach(function (x, k) { if (x.id === id) i = k; });
+    if (i < 0) return;
+    var it = C.data.items[i], kids = C.data.items.filter(function (x) { return x.projet === id; }).length;
+    confirmBox((it.type === 'projet' ? 'Projekt' : 'Immobilie') + ' löschen', '„' + esc(strip(it.titre)) + '“ und die zugehörige Seite werden gelöscht.' +
+      (kids ? ' Die ' + kids + ' zugehörigen Wohnungen bleiben als einzelne Immobilien bestehen.' : '') + ' (Mit „Rückgängig“ holen Sie es zurück, solange Sie die Seite nicht verlassen.)', 'Löschen', true).then(function (ok) {
+      if (!ok) return;
+      sel = null;
+      change(function () {
+        C.data.items.splice(i, 1);
+        C.data.items.forEach(function (x) { if (x.projet === id) x.projet = null; });
+      }, !after);
+      showCtx();
+      if (after) save().then(after);
+    });
+  }
+  var LOCKED = ['index.html', '404.html'];
+  function togglePage(file) {
+    var hp = C.data.site.hidden_pages = C.data.site.hidden_pages || [], gone = hp.indexOf(file) > -1;
+    var name = (PAGES.filter(function (p) { return p[0] === file; })[0] || [file, file])[1];
+    confirmBox(gone ? 'Seite wiederherstellen' : 'Seite löschen', gone ? '„' + esc(name) + '“ ist danach wieder sichtbar und überall verlinkt.'
+      : '„' + esc(name) + '“ wird für Besucher entfernt, alle Links darauf verschwinden aus Menü und Footer. Unter „Seiten“ können Sie sie jederzeit wiederherstellen.',
+      gone ? 'Wiederherstellen' : 'Löschen', !gone).then(function (ok) {
+      if (!ok) return;
+      change(function () { if (gone) hp.splice(hp.indexOf(file), 1); else hp.push(file); });
+      var here = (location.pathname.split('/').pop() || 'index.html') === file;
+      save().then(function () { toast(gone ? 'Seite wiederhergestellt' : 'Seite gelöscht'); if (here && !gone) location.href = 'index.html'; });
+    });
+  }
   function moreSheet() {
     commitEditing();
     var id = A.param('id'), isItem = (A.page === 'bien' || A.page === 'projet') && id;
+    var file = location.pathname.split('/').pop() || 'index.html', isPage = !isItem && LOCKED.indexOf(file) < 0 && PAGES.some(function (p) { return p[0] === file; });
     var html = '<div class="kx-list">' +
       '<button class="kx-li" data-m="newb">➕ Neue Immobilie</button>' +
       '<button class="kx-li" data-m="newp">➕ Neues Projekt</button>' +
       '<button class="kx-li" data-m="newt">➕ Neue Person im Team</button>' +
       '<button class="kx-li" data-m="help">❓ Kurzanleitung</button>' +
-      (isItem ? '<button class="kx-li" data-m="resetp">↺ Dieses Objekt auf Original zurücksetzen</button>' : '') +
+      (isItem ? '<button class="kx-li" data-m="resetp">↺ Dieses Objekt auf Original zurücksetzen</button><button class="kx-li kx-red" data-m="delitem">🗑 Dieses Objekt löschen</button>' : '') +
+      (isPage ? '<button class="kx-li kx-red" data-m="delpage">' + (A.isHidden(file) ? '↺ Diese Seite wiederherstellen' : '🗑 Diese Seite löschen') + '</button>' : '') +
       '<button class="kx-li kx-red" data-m="reset">↺ Ganze Website auf Original zurücksetzen</button>' +
       '<button class="kx-li" data-m="logout">⎋ Abmelden</button></div>';
     var w = sheet('Mehr', html, { noFocus: true });
@@ -699,6 +793,8 @@
         if (a === 'newt') newTeamSheet();
         if (a === 'help') helpSheet();
         if (a === 'resetp') resetItem(id);
+        if (a === 'delitem') { var tp = A.page === 'projet' ? 'projets.html' : 'biens.html'; deleteItem(id, function () { location.href = tp; }); }
+        if (a === 'delpage') togglePage(file);
         if (a === 'reset') resetAll();
         if (a === 'logout') logout();
       };
@@ -710,7 +806,8 @@
       '<li><b>Bild ändern:</b> Bild antippen → „Foto aus Galerie“ oder „Foto aufnehmen“.</li>' +
       '<li><b>Bilder eines Objekts oder der Fotowand:</b> Knopf „Bilder verwalten“ – hinzufügen, löschen, Reihenfolge.</li>' +
       '<li><b>Objekte und Personen:</b> Karte antippen – unten erscheinen ↑ ↓, Angaben, Kopieren, Löschen.</li>' +
-      '<li><b>Neues Objekt / neue Person:</b> unter „Mehr“ oder „Seiten“.</li>' +
+      '<li><b>Neues Objekt / neue Person:</b> unter „Mehr“ oder „Seiten“. Die Kartenposition wird beim Eintippen des Ortes automatisch gesetzt.</li>' +
+      '<li><b>Löschen:</b> Seiten, Projekte und Immobilien unter „Seiten“ (🗑) oder auf der Seite selbst unter „Mehr“. Gelöschte Seiten lassen sich dort wiederherstellen (↺).</li>' +
       '<li><b>Google:</b> Titel, Beschreibung und Bildbeschreibungen pro Seite und Sprache.</li>' +
       '<li><b>Andere Seite bearbeiten:</b> „Seiten“.</li>' +
       '<li><b>Fertig?</b> Auf <b>Speichern</b> tippen. Vertippt? <b>Rückgängig</b>.</li></ol>', { noFocus: true });
@@ -718,17 +815,23 @@
   function newItemSheet(type) {
     var w = sheet(type === 'projet' ? 'Neues Projekt' : 'Neue Immobilie', '<form class="kx-form">' +
       '<label>Titel<input name="t" required placeholder="' + (type === 'projet' ? 'z. B. Residence … – Ort' : 'z. B. Apartment 02 – Residence … – Ort') + '"></label>' +
+      '<label>Ort <small>setzt die Position auf der Karte</small><input name="loc" list="kx-places" autocomplete="off" required></label><datalist id="kx-places"></datalist><p class="kx-err" hidden>Ort nicht gefunden – bitte Schreibweise prüfen.</p>' +
       '<p class="kx-hint">Die neue Seite übernimmt das Layout der bestehenden. Danach Bilder, Texte und Angaben direkt anpassen und speichern.</p>' +
       '<button class="kx-btn kx-primary kx-block" type="submit">Anlegen</button></form>');
+    var places = [];
+    loadPlaces().then(function (list) { places = list; $('#kx-places', w).innerHTML = list.filter(function (p) { return p[3] <= 4; }).map(function (p) { return '<option value="' + esc(p[0].split('|')[0]) + '">'; }).join(''); });
     $('form', w).onsubmit = function (e) {
       e.preventDefault();
       var title = e.target.t.value.trim(); if (!title) return;
+      var pl = findPlace(places, e.target.loc.value);
+      if (!pl) { $('.kx-err', w).hidden = false; e.target.loc.focus(); return; }
       closeSheet();
       var tpl = C.data.items.filter(function (x) { return x.type === type; })[0];
       var it = clone(tpl), base = slug(title), id = base, n = 2;
       while (C.data.items.some(function (x) { return x.id === id; })) id = base + '-' + n++;
       it.id = id; it.titre = title; it.images = []; it.a_laffiche = false; it.ancienne_url = null; it.video = null; it.video_poster = null;
       it.unites = []; it.projet = null; it.description = {}; it.brochure = null; it.avant = it.apres = null;
+      it.localite = it.gemeinde = pl[0].split('|')[0]; it.lat = pl[1]; it.lng = pl[2]; it.adresse = null; it.adresse_exacte = false;
       change(function () { C.data.items.unshift(it); }, false);
       save().then(function () { location.href = A.url(it); });
     };

@@ -1222,16 +1222,36 @@
     var main = $("#main");
     main.innerHTML = "";
     $$("[data-lang]").forEach(function (b) { b.addEventListener("click", function () { setLang(b.dataset.lang); }); });
-    function fill() { if (pages[PAGE]) pages[PAGE](main); footer(); reveal(main); APP.rendered(main); }
+    function fill() {
+      // im Admin gelöschte Seite: Besucher sehen „nicht gefunden“, der Admin sieht sie weiter (zum Wiederherstellen)
+      var pg = !window.DRP_EDIT && isHidden(location.pathname) ? "notfound" : PAGE;
+      if (pages[pg]) pages[pg](main);
+      footer(); pruneLinks(); reveal(main); APP.rendered(main);
+    }
     // Startseite: alles unter dem Hero erst nach dem ersten Paint aufbauen, damit das Hero-Foto zuerst lädt
     var hero = $(".hero__media img");
     if (!hero) return fill();
     var later = function () { requestAnimationFrame(function () { requestAnimationFrame(fill); }); };
     if (hero.complete) later(); else { hero.addEventListener("load", later, { once: true }); hero.addEventListener("error", later, { once: true }); }
   }
+  /* Im Admin gelöschte Seiten (data.site.hidden_pages): alle Links darauf verschwinden */
+  function isHidden(href) {
+    var f = String(href || "").split(/[?#]/)[0].split("/").pop() || "index.html";
+    return (D.site.hidden_pages || []).indexOf(f) > -1;
+  }
+  function pruneLinks() {
+    if (!(D.site.hidden_pages || []).length) return;
+    $$("a[href]").forEach(function (a) {
+      if (!isHidden(a.getAttribute("href")) || /^(https?:|mailto:|tel:|#)/.test(a.getAttribute("href"))) return;
+      var li = a.closest("li");
+      (li && li.closest("nav, footer, .mobile-menu, .sub") ? li : a).remove();
+    });
+  }
+
   /* Schnittstelle für den Admin-Bereich (js/admin.js) */
   var APP = window.DRP_APP = {
-    render: render, t: t, page: PAGE, param: param, url: url,
+    render: render, t: t, page: PAGE, param: param, url: url, isHidden: isHidden,
+    loadLeaflet: loadLeaflet, baseMap: baseMap, markerIcon: markerIcon,
     lang: function () { return lang; }, langs: LANGS, setLang: setLang,
     hooks: [], rendered: function (root) { APP.hooks.forEach(function (fn) { fn(root); }); }
   };

@@ -98,3 +98,14 @@ html.kx-ctx-on .kx-toast{bottom:calc(164px + env(safe-area-inset-bottom))}
 html.kx-on .mobile-bar{display:none!important}
 html.kx-on .kx-text{display:inline;min-width:1ch}
 html.kx-on .rv{opacity:1!important;translate:none!important}
+.kx-lirow{display:flex;gap:6px}
+.kx-lirow>.kx-li:first-child{flex:1}
+.kx-del{flex:0 0 52px;text-align:center!important;font-size:18px!important}
+.kx-gone>.kx-li:first-child{opacity:.55;text-decoration:line-through}
+.kx-gone small{text-decoration:none}
+.kx-mapbox{display:flex;flex-direction:column;gap:8px}
+.kx-lbl2{font-weight:600;font-size:15px!important;color:#15202b}
+.kx-map{height:260px;border-radius:12px;overflow:hidden;border:1.5px solid #c9d1db}
+.kx-latlng{justify-content:stretch}
+.kx-latlng>label{flex:1 1 140px}
+
