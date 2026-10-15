@@ -1,6 +1,7 @@
 /* English – default language. Texts based on drp-group.lu (Oct. 2026). */
 (window.DRP_I18N = window.DRP_I18N || {}).en = {
   meta: {
+    favorites: "Favourites – DRP Group",
     services: "Services – DRP Group",
     home: "DRP Group – Real estate in Luxembourg",
     properties: "Properties – DRP Group",
@@ -12,6 +13,45 @@
     team: "Team – DRP Group",
     contact: "Contact – DRP Group",
     notfound: "Not found – DRP Group"
+  },
+  fav: {
+    nav: "Favourites",
+    save: "Save",
+    saved: "Saved",
+    add_aria: "Save {t}",
+    remove_aria: "Remove {t} from favourites",
+    title: "Favourites",
+    lead: "Properties and projects you have saved on this device. No account needed.",
+    empty: "Nothing saved yet. Tap ♡ on a property or project to keep it here.",
+    browse: "Browse properties",
+    compare: "Compare",
+    compare_hint: "Tick up to 3 to compare them side by side.",
+    compare_title: "Comparison",
+    remove: "Remove",
+    shared_lead: "These properties were shared with you.",
+    add_all: "Add all to my favourites",
+    added: "Added to your favourites",
+    share_title: "Share this list",
+    row_price: "Price",
+    row_surface: "Living area",
+    row_rooms: "Bedrooms",
+    row_place: "Locality",
+    row_energy: "Energy class",
+    row_status: "Status",
+    row_avail: "Availability",
+    na: "not specified",
+    max3: "You can compare up to 3.",
+    count: "{n} saved"
+  },
+  share: {
+    title: "Share",
+    whatsapp: "WhatsApp",
+    email: "E-mail",
+    copy: "Copy link",
+    copied: "Link copied",
+    native: "Share…",
+    msg: "Have a look at this on DRP Group: {t}",
+    list_msg: "My favourites on DRP Group:"
   },
   common: {
     skip: "Skip to content",

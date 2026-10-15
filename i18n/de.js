@@ -1,6 +1,7 @@
 /* Deutsch */
 (window.DRP_I18N = window.DRP_I18N || {}).de = {
   meta: {
+    favorites: "Merkliste – DRP Group",
     services: "Leistungen – DRP Group",
     home: "DRP Group – Immobilien in Luxemburg",
     properties: "Immobilien – DRP Group",
@@ -12,6 +13,45 @@
     team: "Team – DRP Group",
     contact: "Kontakt – DRP Group",
     notfound: "Seite nicht gefunden – DRP Group"
+  },
+  fav: {
+    nav: "Merkliste",
+    save: "Merken",
+    saved: "Gemerkt",
+    add_aria: "{t} merken",
+    remove_aria: "{t} von der Merkliste entfernen",
+    title: "Merkliste",
+    lead: "Immobilien und Projekte, die Sie auf diesem Gerät gemerkt haben. Ohne Konto.",
+    empty: "Noch nichts gemerkt. Tippen Sie bei einer Immobilie oder einem Projekt auf ♡, um es hier zu sammeln.",
+    browse: "Immobilien ansehen",
+    compare: "Vergleichen",
+    compare_hint: "Bis zu 3 ankreuzen, um sie nebeneinander zu vergleichen.",
+    compare_title: "Vergleich",
+    remove: "Entfernen",
+    shared_lead: "Diese Immobilien wurden mit Ihnen geteilt.",
+    add_all: "Alle auf meine Merkliste",
+    added: "Zur Merkliste hinzugefügt",
+    share_title: "Merkliste teilen",
+    row_price: "Preis",
+    row_surface: "Wohnfläche",
+    row_rooms: "Schlafzimmer",
+    row_place: "Ort",
+    row_energy: "Energieklasse",
+    row_status: "Status",
+    row_avail: "Verfügbar",
+    na: "nicht angegeben",
+    max3: "Sie können bis zu 3 vergleichen.",
+    count: "{n} gemerkt"
+  },
+  share: {
+    title: "Teilen",
+    whatsapp: "WhatsApp",
+    email: "E-Mail",
+    copy: "Link kopieren",
+    copied: "Link kopiert",
+    native: "Teilen…",
+    msg: "Schau dir das bei DRP Group an: {t}",
+    list_msg: "Meine Merkliste bei DRP Group:"
   },
   common: {
     skip: "Zum Inhalt springen",

@@ -1,6 +1,7 @@
 /* Français */
 (window.DRP_I18N = window.DRP_I18N || {}).fr = {
   meta: {
+    favorites: "Favoris – DRP Group",
     services: "Services – DRP Group",
     home: "DRP Group – Immobilier au Luxembourg",
     properties: "Biens – DRP Group",
@@ -12,6 +13,45 @@
     team: "Équipe – DRP Group",
     contact: "Contact – DRP Group",
     notfound: "Page introuvable – DRP Group"
+  },
+  fav: {
+    nav: "Favoris",
+    save: "Sauvegarder",
+    saved: "Sauvegardé",
+    add_aria: "Ajouter {t} aux favoris",
+    remove_aria: "Retirer {t} des favoris",
+    title: "Favoris",
+    lead: "Les biens et projets que vous avez sauvegardés sur cet appareil. Aucun compte nécessaire.",
+    empty: "Rien de sauvegardé pour l’instant. Touchez ♡ sur un bien ou un projet pour le retrouver ici.",
+    browse: "Voir les biens",
+    compare: "Comparer",
+    compare_hint: "Cochez jusqu’à 3 biens pour les comparer côte à côte.",
+    compare_title: "Comparaison",
+    remove: "Retirer",
+    shared_lead: "Ces biens ont été partagés avec vous.",
+    add_all: "Tout ajouter à mes favoris",
+    added: "Ajouté à vos favoris",
+    share_title: "Partager cette liste",
+    row_price: "Prix",
+    row_surface: "Surface habitable",
+    row_rooms: "Chambres",
+    row_place: "Localité",
+    row_energy: "Classe énergétique",
+    row_status: "Statut",
+    row_avail: "Disponibilité",
+    na: "non indiqué",
+    max3: "Vous pouvez comparer jusqu’à 3 biens.",
+    count: "{n} sauvegardé(s)"
+  },
+  share: {
+    title: "Partager",
+    whatsapp: "WhatsApp",
+    email: "E-mail",
+    copy: "Copier le lien",
+    copied: "Lien copié",
+    native: "Partager…",
+    msg: "Regarde ceci chez DRP Group : {t}",
+    list_msg: "Mes favoris chez DRP Group :"
   },
   common: {
     skip: "Aller au contenu",

@@ -1,6 +1,7 @@
 /* Lëtzebuergesch – ENTWURF, muss vun engem Mammesproochler korrigéiert ginn (kuck OFFEN.md). */
 (window.DRP_I18N = window.DRP_I18N || {}).lb = {
   meta: {
+    favorites: "Favoritten – DRP Group",
     services: "Servicer – DRP Group",
     home: "DRP Group – Immobilien zu Lëtzebuerg",
     properties: "Immobilien – DRP Group",
@@ -12,6 +13,45 @@
     team: "Equipe – DRP Group",
     contact: "Kontakt – DRP Group",
     notfound: "Säit net fonnt – DRP Group"
+  },
+  fav: {
+    nav: "Favoritten",
+    save: "Späicheren",
+    saved: "Gespäichert",
+    add_aria: "{t} späicheren",
+    remove_aria: "{t} vun de Favoritte läschen",
+    title: "Favoritten",
+    lead: "Immobilien a Projeten, déi Dir op dësem Apparat gespäichert hutt. Ouni Kont.",
+    empty: "Nach näischt gespäichert. Tippt bei enger Immobilie oder engem Projet op ♡, fir se hei ze sammelen.",
+    browse: "Immobilien ukucken",
+    compare: "Vergläichen",
+    compare_hint: "Bis zu 3 ukräizen, fir se nieftenee ze vergläichen.",
+    compare_title: "Vergläich",
+    remove: "Ewechhuelen",
+    shared_lead: "Dës Immobilie goufe mat Iech gedeelt.",
+    add_all: "All op meng Favoritten",
+    added: "Bäi d’Favoritte gesat",
+    share_title: "Lëscht deelen",
+    row_price: "Präis",
+    row_surface: "Wunnfläch",
+    row_rooms: "Schlofzëmmer",
+    row_place: "Uertschaft",
+    row_energy: "Energieklass",
+    row_status: "Status",
+    row_avail: "Disponibel",
+    na: "net uginn",
+    max3: "Dir kënnt bis zu 3 vergläichen.",
+    count: "{n} gespäichert"
+  },
+  share: {
+    title: "Deelen",
+    whatsapp: "WhatsApp",
+    email: "E-Mail",
+    copy: "Link kopéieren",
+    copied: "Link kopéiert",
+    native: "Deelen…",
+    msg: "Kuck dir dat bei DRP Group un: {t}",
+    list_msg: "Meng Favoritten bei DRP Group:"
   },
   common: {
     skip: "Direkt bei den Inhalt",

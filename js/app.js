@@ -128,6 +128,9 @@
     return '<div class="card__media" style="position:relative">' + badge(it) + cardImg(it.images[0], it.titre, ratio, eager) + "</div>";
   }
   function card(it) {
+    return '<div class="card-wrap">' + cardLink(it) + favBtn(it) + "</div>";
+  }
+  function cardLink(it) {
     return '<a class="card' + (isClosed(it) ? " is-closed" : "") + '" href="' + url(it) + '">' + media(it, "r-4x5") +
       '<div class="card__place">' + esc(place(it)) + "</div>" +
       '<h3 class="card__title">' + esc(it.titre) + "</h3>" +
@@ -177,6 +180,69 @@
     cleanups.push(function () { io.disconnect(); });
   }
 
+  /* ------------------------------------------------------------ Merkliste (nur auf diesem Gerät) und Teilen */
+  function favGet() { try { var v = JSON.parse(localStorage.getItem("drp-fav") || "[]"); return Array.isArray(v) ? v : []; } catch (e) { return favGet.mem || []; } }
+  function favSet(a) { favGet.mem = a; try { localStorage.setItem("drp-fav", JSON.stringify(a)); } catch (e) { /* privates Fenster: nur bis zum Neuladen */ } }
+  function favHas(id) { return favGet().indexOf(id) > -1; }
+  function favBtn(it) {
+    var on = favHas(it.id);
+    return '<button type="button" class="fav-btn" data-fav="' + esc(it.id) + '" aria-pressed="' + on + '" aria-label="' + esc(t(on ? "fav.remove_aria" : "fav.add_aria", { t: it.titre })) + '">' + ICON.heart + "</button>";
+  }
+  function favSync() { // alle Herzen, Zähler und Merk-Knöpfe auf den aktuellen Stand bringen
+    var list = favGet();
+    $$("[data-fav]").forEach(function (b) {
+      var id = b.getAttribute("data-fav"), on = list.indexOf(id) > -1, it = byId(id);
+      b.setAttribute("aria-pressed", String(on));
+      if (b.classList.contains("fav-btn") && it) b.setAttribute("aria-label", t(on ? "fav.remove_aria" : "fav.add_aria", { t: it.titre }));
+      var lbl = $("span", b); if (lbl && b.classList.contains("fav-toggle")) lbl.textContent = t(on ? "fav.saved" : "fav.save");
+    });
+    $$("[data-fav-count]").forEach(function (c) { c.textContent = list.length || ""; });
+    $$(".fav-link").forEach(function (a) { a.setAttribute("aria-label", t("fav.nav") + (list.length ? " – " + t("fav.count", { n: list.length }) : "")); });
+  }
+  function plain(x) { return String(x).replace(/\uE000[^\uE001]*\uE001|\uE002/g, ""); } // ohne Admin-Markierungen
+  function shareUrl(path) {
+    var u = new URL(path || location.href, location.href); u.searchParams.delete("lang"); u.hash = ""; return u.href;
+  }
+  function shareBox(url, text, subject) {
+    var enc = encodeURIComponent;
+    return '<div class="share"><span class="eyebrow">' + esc(t("share.title")) + '</span><div class="share__btns">' +
+      (navigator.share ? '<button type="button" class="share__btn" data-share-native data-url="' + esc(url) + '" data-text="' + esc(text) + '">' + ICON.share + "<span>" + esc(t("share.native")) + "</span></button>" : "") +
+      '<a class="share__btn" href="https://wa.me/?text=' + enc(text + " " + url) + '" target="_blank" rel="noopener">' + ICON.wa + "<span>" + esc(t("share.whatsapp")) + '</span><span class="visually-hidden"> (' + esc(t("common.opens_new")) + ")</span></a>" +
+      '<a class="share__btn" href="mailto:?subject=' + enc(subject) + "&body=" + enc(text + "\n\n" + url) + '">' + ICON.mail + "<span>" + esc(t("share.email")) + "</span></a>" +
+      '<button type="button" class="share__btn" data-copy="' + esc(url) + '">' + ICON.link + "<span>" + esc(t("share.copy")) + "</span></button>" +
+      '</div><span class="visually-hidden" role="status" data-share-status></span></div>';
+  }
+  function copyText(txt) {
+    if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(txt);
+    return new Promise(function (res, rej) { // Ersatz für file:// und ältere Browser
+      var ta = document.createElement("textarea"); ta.value = txt; ta.setAttribute("readonly", ""); ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.select(); var ok = false; try { ok = document.execCommand("copy"); } catch (e) { /* ignore */ }
+      ta.remove(); ok ? res() : rej();
+    });
+  }
+  document.addEventListener("click", function (e) {
+    var f = e.target.closest("[data-fav]");
+    if (f) {
+      e.preventDefault(); e.stopPropagation();
+      var id = f.getAttribute("data-fav"), list = favGet(), i = list.indexOf(id);
+      if (i > -1) list.splice(i, 1); else list.push(id);
+      favSet(list); favSync();
+      if (PAGE === "merkliste" && !param("ids")) render();
+      return;
+    }
+    var c = e.target.closest("[data-copy]");
+    if (c) {
+      var lbl = $("span", c), old = lbl.textContent;
+      copyText(c.getAttribute("data-copy")).then(function () {
+        lbl.textContent = t("share.copied"); var st = $("[data-share-status]", c.closest(".share")); if (st) st.textContent = t("share.copied");
+        setTimeout(function () { lbl.textContent = old; }, 2000);
+      }, function () { window.prompt(t("share.copy"), c.getAttribute("data-copy")); });
+      return;
+    }
+    var n = e.target.closest("[data-share-native]");
+    if (n) navigator.share({ title: document.title, text: n.getAttribute("data-text"), url: n.getAttribute("data-url") }).catch(function () { /* abgebrochen */ });
+  });
+
   /* Fehlende Bilddatei → Platzhalter, damit das Layout steht */
   document.addEventListener("error", function (e) {
     var el = e.target;
@@ -193,6 +259,11 @@
 
   /* ------------------------------------------------------------ icons */
   var ICON = {
+    heart: '<svg class="i-heart" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-7.5-10.2A4.3 4.3 0 0112 7.6a4.3 4.3 0 017.5 2.7c0 5.6-7.5 10.2-7.5 10.2z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>',
+    wa: '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5a8.5 8.5 0 00-7.3 12.8L3.5 20.5l4.3-1.1A8.5 8.5 0 1012 3.5z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M9.2 8.6c.3-.6.6-.6.9-.6h.4c.2 0 .4 0 .5.4l.6 1.5c.1.2 0 .4-.1.6l-.5.6c.6 1.1 1.5 2 2.6 2.6l.6-.5c.2-.2.4-.2.6-.1l1.5.6c.3.1.4.3.4.5v.4c0 .3 0 .6-.6.9-.5.3-1.7.5-3.6-.6a8 8 0 01-3-3c-1.1-1.9-.9-3.1-.6-3.6z" fill="currentColor"/></svg>',
+    mail: '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="13" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M4 6.5l8 6 8-6" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>',
+    link: '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4 4 0 005.7 0l3-3a4 4 0 00-5.7-5.7l-1 1M14 10a4 4 0 00-5.7 0l-3 3a4 4 0 005.7 5.7l1-1" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>',
+    share: '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V4M8 8l4-4 4 4M5 12v7a1 1 0 001 1h12a1 1 0 001-1v-7" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
     prev: '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>',
     next: '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>',
     pin: '<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6-5.5-6-11a6 6 0 1112 0c0 5.5-6 11-6 11z" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="12" cy="10" r="2" fill="currentColor"/></svg>',
@@ -238,7 +309,7 @@
       '<ul class="sub" id="sub-activities">' + subs + "</ul></li>" +
       NAV.map(function (n) { return '<li><a href="' + n[1] + '"' + current(n[0]) + ">" + esc(t(n[2])) + "</a></li>"; }).join("") +
       "</ul></nav>" +
-      '<div class="header-actions">' + langMenu() +
+      '<div class="header-actions">' + '<a class="fav-link" href="merkliste.html"' + current("merkliste") + ">" + ICON.heart + '<span class="fav-count" data-fav-count>' + (favGet().length || "") + "</span></a>" + langMenu() +
       (IS_OBJ ? "" : '<a class="btn" href="estimation.html">' + esc(t("nav.cta")) + "</a>") +
       '<button type="button" class="menu-btn" aria-expanded="false" aria-controls="mobile-menu">' + esc(t("common.menu")) + '<span class="bars" aria-hidden="true"></span></button>' +
       "</div></div></header>" +
@@ -247,7 +318,7 @@
       '<button type="button" class="menu-btn" data-close>' + esc(t("common.close")) + "</button></div>" +
       '<nav aria-label="Mobile"><ul>' +
       NAV.map(function (n) { return '<li><a href="' + n[1] + '"' + current(n[0]) + ">" + esc(t(n[2])) + "</a></li>"; }).join("") +
-      '<li><a href="team.html"' + current("team") + ">" + esc(t("nav.team")) + "</a></li></ul>" +
+      '<li><a href="team.html"' + current("team") + ">" + esc(t("nav.team")) + '</a></li><li><a href="merkliste.html"' + current("merkliste") + ">" + esc(t("fav.nav")) + "</a></li></ul>" +
       '<span class="eyebrow group-label">' + esc(t("nav.activities")) + "</span><ul>" + subs + "</ul></nav>" +
       langSwitch() + '<a class="btn" href="estimation.html">' + esc(t("nav.cta")) + "</a>" + ctaNote() + "</div>";
 
@@ -818,6 +889,49 @@
     draw();
   }
   pages.biens = function (main) { listPage(main, "bien"); };
+
+  /* Merkliste mit Vergleich (bis 3). ?ids=a,b,c = geteilte Liste */
+  pages.merkliste = function (main) {
+    var shared = param("ids") ? param("ids").split(",").filter(function (id) { return byId(id); }) : null;
+    var ids = shared || favGet().filter(function (id) { return byId(id); });
+    var sel = ids.slice(0, 3);
+    function row(label, fn) { return "<tr><th scope=\"row\">" + esc(label) + "</th>" + sel.map(function (id) { var v = fn(byId(id)); return "<td>" + (v ? esc(v) : '<span class="muted">' + esc(t("fav.na")) + "</span>") + "</td>"; }).join("") + "</tr>"; }
+    function compare() {
+      if (sel.length < 2) return '<p class="muted">' + esc(t("fav.compare_hint")) + "</p>";
+      return '<div class="cmp-scroll"><table class="cmp" style="--n:' + sel.length + '"><caption class="visually-hidden">' + esc(t("fav.compare_title")) + "</caption><thead><tr><td></td>" +
+        sel.map(function (id) { var it = byId(id); return '<th scope="col"><a href="' + url(it) + '">' + img(it.images[0], "", "r-3x2") + "<span>" + esc(it.titre) + "</span></a></th>"; }).join("") + "</tr></thead><tbody>" +
+        row(t("fav.row_price"), priceText) + row(t("fav.row_surface"), surfaceText) + row(t("fav.row_rooms"), function (it) { return it.chambres || ""; }) +
+        row(t("fav.row_place"), place) + row(t("fav.row_energy"), function (it) { return it.energie || ""; }) +
+        row(t("fav.row_status"), function (it) { return t("status." + it.statut); }) + row(t("fav.row_avail"), function (it) { return availabilityText(it.disponibilite); }) +
+        "</tbody></table></div>";
+    }
+    var listUrl = shareUrl("merkliste.html?ids=" + ids.map(encodeURIComponent).join(","));
+    main.innerHTML = pageHead(D.site.entetes.biens, t("fav.title")) + '<div class="wrap fav-page">' +
+      '<div class="page-intro"><p class="lead">' + esc(t(shared ? "fav.shared_lead" : "fav.lead")) + "</p>" +
+      (shared && ids.length ? '<button type="button" class="btn" data-add-all>' + ICON.heart + " " + esc(t("fav.add_all")) + "</button>" : "") + "</div>" +
+      (ids.length ?
+        (ids.length > 1 ? '<section class="fav-cmp-sec" aria-labelledby="h-cmp"><h2 class="h-small" id="h-cmp">' + esc(t("fav.compare_title")) + '</h2><div data-cmp-out>' + compare() + "</div></section>" : "") +
+        '<div class="grid fav-grid">' + ids.map(function (id) {
+          return '<div class="fav-item">' + card(byId(id)) + (ids.length > 1 ? '<label class="fav-cmp"><input type="checkbox" data-cmp="' + esc(id) + '"' + (sel.indexOf(id) > -1 ? " checked" : "") + "> " + esc(t("fav.compare")) + "</label>" : "") + "</div>";
+        }).join("") + "</div>" +
+        (shared ? "" : shareBox(listUrl, t("share.list_msg"), t("fav.title") + " – DRP Group"))
+        : '<div class="fav-empty"><p>' + esc(t("fav.empty")) + '</p><a class="btn" href="biens.html">' + esc(t("fav.browse")) + "</a></div>") +
+      '</div><div style="height:clamp(64px,10vw,140px)"></div>';
+    $$("[data-cmp]", main).forEach(function (cb) {
+      cb.addEventListener("change", function () {
+        var id = cb.getAttribute("data-cmp");
+        if (cb.checked && sel.length >= 3) { cb.checked = false; $("[data-cmp-out]", main).insertAdjacentHTML("afterbegin", '<p class="cmp-max" role="status">' + esc(t("fav.max3")) + "</p>"); return; }
+        sel = cb.checked ? sel.concat(id) : sel.filter(function (x) { return x !== id; });
+        sel = ids.filter(function (x) { return sel.indexOf(x) > -1; }); // Reihenfolge wie in der Liste
+        $("[data-cmp-out]", main).innerHTML = compare();
+      });
+    });
+    var add = $("[data-add-all]", main);
+    if (add) add.addEventListener("click", function () {
+      var list = favGet(); ids.forEach(function (id) { if (list.indexOf(id) < 0) list.push(id); }); favSet(list); favSync();
+      add.textContent = t("fav.added"); add.disabled = true;
+    });
+  };
   pages.projets = function (main) { listPage(main, "projet"); };
 
   pages.carte = function (main) {
@@ -966,7 +1080,9 @@
       '<aside class="aside-sticky"><ul class="keyfacts">' + facts.join("") + "</ul>" +
       '<div class="btn-row" style="flex-direction:column">' +
       '<a class="btn" href="contact.html?sujet=visite&amp;ref=' + encodeURIComponent(it.id) + '">' + esc(t("detail.visit")) + "</a>" +
+      '<button type="button" class="btn btn--ghost fav-toggle" data-fav="' + esc(it.id) + '" aria-pressed="' + favHas(it.id) + '">' + ICON.heart + "<span>" + esc(t(favHas(it.id) ? "fav.saved" : "fav.save")) + "</span></button>" +
       (it.brochure ? '<a class="btn btn--ghost" href="' + esc(it.brochure) + '" download>' + esc(t("detail.brochure")) + "</a>" : "") + "</div>" +
+      shareBox(shareUrl(), t("share.msg", { t: plain(it.titre) }), plain(it.titre) + " – DRP Group") +
       (contact ? '<div class="contact-card" style="grid-template-columns:80px 1fr;gap:16px">' + img(contact.photo, contact.nom, "r-2x3") +
         "<div><h3 style=\"font-size:1rem\">" + esc(contact.nom) + "</h3><p>" + esc(contact.role) + "</p></div></div>" : "") +
       "</aside></div></div>";
@@ -1227,7 +1343,7 @@
     document.documentElement.lang = lang;
     var fav = $('link[rel="icon"]'); if (fav && D.site.logo && fav.getAttribute("href") !== D.site.logo) fav.href = D.site.logo;
     var metaKey = { home: "home", biens: "properties", bien: "properties", projets: "projects", projet: "projects", carte: "map", durabilite: "sustainability",
-      estimation: "valuation", about: "about", team: "team", membre: "team", contact: "contact", services: "services", notfound: "notfound", bereich: "home" }[PAGE];
+      estimation: "valuation", about: "about", team: "team", membre: "team", contact: "contact", services: "services", notfound: "notfound", bereich: "home", merkliste: "favorites" }[PAGE];
     document.title = t("meta." + metaKey);
     $(".skip-link").textContent = t("common.skip");
     header();
