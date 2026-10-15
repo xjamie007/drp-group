@@ -1322,9 +1322,11 @@
     if (REDUCED || m.dataset.videoKey === key) return;
     $$("video", m).forEach(function (v) { v.remove(); }); m.classList.remove("has-video");
     m.dataset.videoKey = key;
-    if (document.readyState !== "complete") { window.addEventListener("load", function () { delete m.dataset.videoKey; initHero(); }, { once: true }); return; }
+    if (!hi.complete) { hi.addEventListener("load", function () { delete m.dataset.videoKey; initHero(); }, { once: true }); return; } // erst das Startfoto, dann das Video
     // Video-Slot: liegt assets/hero/hero.webm oder .mp4 vor, ersetzt es das Foto.
     var v = document.createElement("video");
+    // Safari spielt nur stumme Videos von selbst ab – und prüft dafür die Attribute, nicht nur die Eigenschaften
+    ["muted", "autoplay", "loop", "playsinline"].forEach(function (a) { v.setAttribute(a, ""); });
     v.muted = true; v.loop = true; v.playsInline = true; v.autoplay = true; v.preload = "auto";
     v.setAttribute("aria-hidden", "true"); // kein Poster: das Foto liegt darunter, bis das Video läuft
     [[D.site.hero_video_webm, "video/webm"], [D.site.hero_video_mp4, "video/mp4"]].forEach(function (s) {
@@ -1334,6 +1336,12 @@
     v.addEventListener("playing", function () { m.classList.add("has-video"); });
     $$("source", v).pop().addEventListener("error", function () { v.remove(); });
     m.appendChild(v);
+    function play() { var p = v.play(); if (p && p.catch) p.catch(function () { /* blockiert, z. B. Stromsparmodus */ }); }
+    v.addEventListener("canplay", play, { once: true });
+    play();
+    // Stromsparmodus/Einstellung blockiert Autoplay: bei der ersten Berührung, Taste oder Mausbewegung starten
+    function kick() { if (v.paused && v.isConnected) play(); ["pointerdown", "touchstart", "keydown", "pointermove", "scroll"].forEach(function (ev) { window.removeEventListener(ev, kick); }); }
+    ["pointerdown", "touchstart", "keydown", "pointermove", "scroll"].forEach(function (ev) { window.addEventListener(ev, kick, { passive: true }); });
   }
 
   /* ------------------------------------------------------------ render */
