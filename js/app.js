@@ -910,10 +910,11 @@
       '<div class="page-intro"><p class="lead">' + esc(t(shared ? "fav.shared_lead" : "fav.lead")) + "</p>" +
       (shared && ids.length ? '<button type="button" class="btn" data-add-all>' + ICON.heart + " " + esc(t("fav.add_all")) + "</button>" : "") + "</div>" +
       (ids.length ?
-        (ids.length > 1 ? '<section class="fav-cmp-sec" aria-labelledby="h-cmp"><h2 class="h-small" id="h-cmp">' + esc(t("fav.compare_title")) + '</h2><div data-cmp-out>' + compare() + "</div></section>" : "") +
         '<div class="grid fav-grid">' + ids.map(function (id) {
           return '<div class="fav-item">' + card(byId(id)) + (ids.length > 1 ? '<label class="fav-cmp"><input type="checkbox" data-cmp="' + esc(id) + '"' + (sel.indexOf(id) > -1 ? " checked" : "") + "> " + esc(t("fav.compare")) + "</label>" : "") + "</div>";
         }).join("") + "</div>" +
+        // Vergleich unter den gemerkten Objekten
+        (ids.length > 1 ? '<section class="fav-cmp-sec" aria-labelledby="h-cmp"><h2 class="h-small" id="h-cmp">' + esc(t("fav.compare_title")) + '</h2><div data-cmp-out>' + compare() + "</div></section>" : "") +
         (shared ? "" : shareBox(listUrl, t("share.list_msg"), t("fav.title") + " – DRP Group"))
         : '<div class="fav-empty"><p>' + esc(t("fav.empty")) + '</p><a class="btn" href="biens.html">' + esc(t("fav.browse")) + "</a></div>") +
       '</div><div style="height:clamp(64px,10vw,140px)"></div>';

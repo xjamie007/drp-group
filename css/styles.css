@@ -750,7 +750,7 @@ html.rv-on .rv.rv-in { opacity: 1; translate: 0 0; transition: opacity .9s cubic
 .share__btn:hover { border-color: var(--slate); background: var(--off); }
 .fav-page .share { margin-top: 48px; }
 .fav-page .page-intro .btn { margin-top: 20px; display: inline-flex; gap: 10px; align-items: center; }
-.fav-cmp-sec { margin-bottom: clamp(40px, 6vw, 72px); }
+.fav-cmp-sec { margin-top: clamp(48px, 7vw, 88px); }
 .fav-cmp-sec .h-small { margin-bottom: 20px; }
 .fav-cmp { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; margin-top: 8px; font-size: .9rem; cursor: pointer; }
 .fav-cmp input { width: 20px; height: 20px; accent-color: var(--slate); }
