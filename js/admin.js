@@ -26,7 +26,7 @@
   function strip(s) { return String(s).replace(STRIP, ''); }
   function fresh() {
     var c = window.DRP_CONTENT ? clone(window.DRP_CONTENT) : {};
-    return { version: 1, data: c.data || clone(ST.original.data), i18n: c.i18n || {}, seo: c.seo || {}, alts: c.alts || {}, trash: c.trash || [] };
+    return { version: 1, dataSig: ST.dataSig, data: c.data || clone(ST.original.data), i18n: c.i18n || {}, seo: c.seo || {}, alts: c.alts || {}, trash: c.trash || [] };
   }
 
   /* Seite, für die Titel/Beschreibung gelten (z. B. „bien:apartment-01…“) */
@@ -133,8 +133,10 @@
   function start() {
     admin = true; window.DRP_EDIT = true;
     window.DRP_SAVED = window.DRP_CONTENT || null;
+    var stale = window.DRP_CONTENT && window.DRP_CONTENT.staleData;
     C = fresh();
     document.documentElement.classList.add('kx-on');
+    if (stale) setTimeout(function () { toast('Die Website wurde inzwischen aktualisiert. Frühere Änderungen an Objekten, Team und Fotos gelten nicht mehr; Texte und Google-Angaben bleiben.', 7000); }, 4500);
     buildBar();
     observe();
     refresh();
@@ -689,7 +691,7 @@
   function loadPlaces() {
     if (window.DRP_PLACES) return Promise.resolve(window.DRP_PLACES);
     return placesP || (placesP = new Promise(function (res) {
-      var sc = document.createElement('script'); sc.src = 'js/places.js?v=20261015b'; sc.onload = function () { res(window.DRP_PLACES || []); }; sc.onerror = function () { res([]); };
+      var sc = document.createElement('script'); sc.src = 'js/places.js?v=20261015c'; sc.onload = function () { res(window.DRP_PLACES || []); }; sc.onerror = function () { res([]); };
       document.head.appendChild(sc);
     }));
   }

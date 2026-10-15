@@ -1041,7 +1041,7 @@
     // Video-Slot: ist `video` gesetzt, ersetzt es oben das erste Foto; die Fotos bleiben in der Galerie
     var videoHtml = isP && it.video ? '<video muted loop playsinline ' + (REDUCED ? "controls" : "autoplay") + ' poster="' + esc(it.video_poster || imgs[0] || "") + '" src="' + esc(it.video) + '" aria-label="' + esc(it.titre) + '"></video>' : "";
     var mediaHtml = '<div class="gallery" role="region" aria-roledescription="carousel" aria-label="' + esc(t("detail.gallery")) + '" tabindex="0">' +
-        '<div class="gallery__main" style="position:relative">' + badge(it) + '<div class="ratio r-3x2" id="g-main">' +
+        '<div class="gallery__main" style="position:relative">' + badge(it) + favBtn(it) + '<div class="ratio r-3x2" id="g-main">' +
         (videoHtml || (imgs[0] ? '<img src="' + esc(imgs[0]) + '" alt="' + esc(it.titre + " – " + t("detail.photo_n", { n: 1 })) + '" fetchpriority="high">' : ph())) + "</div>" +
         (imgs.length > 1 ? '<span class="gallery__count" aria-live="polite">1 / ' + imgs.length + "</span>" +
           '<div class="gallery__nav"><button type="button" class="icon-btn" data-g="-1" aria-label="' + esc(t("common.previous")) + '">' + ICON.prev + "</button>" +

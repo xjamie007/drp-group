@@ -171,6 +171,9 @@ window.SITE_CONFIG = {
     o[last] = val;
   }
   var ORIGINAL = { data: clone(window.DRP_DATA), i18n: clone(window.DRP_I18N) };
+  // Fingerabdruck von data.js: gespeicherte Objektdaten gelten nur für genau diesen Stand.
+  // Sonst würde eine alte, vollständige Kopie jede spätere Aktualisierung der Website überdecken.
+  var DATA_SIG = (function (str) { var h = 5381; for (var i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) | 0; return (h >>> 0).toString(36); })(JSON.stringify(window.DRP_DATA));
   // hochgeladene Bilder ("uploads/…") → Adresse, die der Browser laden kann
   function resolve(o) {
     if (typeof o === 'string') return /^uploads\//.test(o) ? S.imageUrl(o) : o;
@@ -179,6 +182,7 @@ window.SITE_CONFIG = {
     return o;
   }
   function apply(c) {
+    if (c && c.data && c.dataSig !== DATA_SIG) { c.data = null; c.staleData = true; } // Website inzwischen aktualisiert
     window.DRP_CONTENT = c;
     window.DRP_DATA = resolve(c && c.data ? c.data : ORIGINAL.data);
     var i18n = clone(ORIGINAL.i18n);
@@ -188,7 +192,7 @@ window.SITE_CONFIG = {
     });
     window.DRP_I18N = i18n;
   }
-  window.DRP_STORE = { original: ORIGINAL, apply: apply, resolve: resolve, clone: clone };
+  window.DRP_STORE = { original: ORIGINAL, apply: apply, resolve: resolve, clone: clone, dataSig: DATA_SIG };
 
   // nie länger als 1,5 s warten (z. B. gesperrter Speicher im privaten Fenster)
   var timeout = new Promise(function (r) { setTimeout(function () { r(null); }, 1500); });
