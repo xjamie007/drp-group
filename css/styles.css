@@ -241,8 +241,11 @@ ul { margin: 0; padding: 0; }
   overflow: hidden; background: var(--slate); color: var(--white);
 }
 .hero__media, .hero__media img, .hero__media video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.hero__media video { opacity: 0; transition: opacity 1.2s var(--ease); }
+.hero__media video { opacity: .01; transition: opacity 1.2s var(--ease); } /* nicht 0: Safari spielt unsichtbare Videos nicht von selbst ab */
 .hero__media.has-video video { opacity: 1; }
+/* Safaris eigene Abspieltaste nie zeigen (erscheint, wenn z. B. der Stromsparmodus Autoplay anhält) */
+.hero__media video::-webkit-media-controls, .hero__media video::-webkit-media-controls-start-playback-button,
+.hero__media video::-webkit-media-controls-overlay-play-button { display: none !important; -webkit-appearance: none; }
 .hero::after {
   content: ""; position: absolute; inset: 0; pointer-events: none;
   background: linear-gradient(to bottom, rgba(20, 22, 24, .42) 0%, rgba(20, 22, 24, 0) 26%, rgba(20, 22, 24, 0) 70%, rgba(20, 22, 24, .38) 100%);

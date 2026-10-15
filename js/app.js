@@ -1334,10 +1334,17 @@
       var src = document.createElement("source"); src.src = s[0]; if (!/^blob:/.test(s[0])) src.type = s[1]; v.appendChild(src);
     });
     v.addEventListener("playing", function () { m.classList.add("has-video"); });
+    v.addEventListener("pause", function () { m.classList.remove("has-video"); }); // vom System angehalten → Foto statt Abspieltaste
     $$("source", v).pop().addEventListener("error", function () { v.remove(); });
     m.appendChild(v);
-    function play() { var p = v.play(); if (p && p.catch) p.catch(function () { /* blockiert, z. B. Stromsparmodus */ }); }
+    // Safari lehnt zu frühe Versuche ab (Seite noch im Aufbau) → einige Male kurz danach wiederholen
+    var tries = 0;
+    function play() {
+      var p = v.play();
+      if (p && p.catch) p.catch(function () { if (++tries < 20 && v.isConnected) setTimeout(play, 300 + 200 * Math.min(tries, 5)); });
+    }
     v.addEventListener("canplay", play, { once: true });
+    if (document.readyState !== "complete") window.addEventListener("load", function () { if (v.paused) { tries = 0; play(); } }, { once: true });
     play();
     // Stromsparmodus/Einstellung blockiert Autoplay: bei der ersten Berührung, Taste oder Mausbewegung starten
     function kick() { if (v.paused && v.isConnected) play(); ["pointerdown", "touchstart", "keydown", "pointermove", "scroll"].forEach(function (ev) { window.removeEventListener(ev, kick); }); }
