@@ -1,6 +1,7 @@
 /* Deutsch */
 (window.DRP_I18N = window.DRP_I18N || {}).de = {
   meta: {
+    privacy: "Datenschutz – DRP Group",
     favorites: "Merkliste – DRP Group",
     services: "Leistungen – DRP Group",
     home: "DRP Group – Immobilien in Luxemburg",
@@ -52,6 +53,9 @@
     native: "Teilen…",
     msg: "Schau dir das bei DRP Group an: {t}",
     list_msg: "Meine Merkliste bei DRP Group:"
+  },
+  legal: {
+    only_en: "Die Datenschutzerklärung liegt derzeit nur auf Englisch vor."
   },
   common: {
     skip: "Zum Inhalt springen",
@@ -272,6 +276,7 @@
     green: "Green Challenge: Für jede verkaufte Einheit wird ein Baum gepflanzt."
   },
   sust: {
+    seed_alt: "Eine Hand legt einen Samen in die Erde, daraus wächst ein kleiner Spross.",
     title: "Nachhaltigkeit",
     lead: "„Unsere Vision beruht auf zwei Säulen: nachhaltige Projekte und zufriedene Kunden.“",
     vision: "Nachhaltigkeit hat weiterhin Vorrang. Wir entwickeln umweltfreundliche Wohn- und Geschäftsgebäude, die für Qualität und Komfort stehen. DRP Group steht für eine harmonische Entwicklung und guten Service gegenüber Kunden und Lieferanten und setzt sich für eine nachhaltige Zukunft ein.",

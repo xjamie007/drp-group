@@ -72,7 +72,7 @@ window.DRP_DATA = {
       "team": "assets/entetes/team.jpg",
       "contact": "assets/entetes/contact.jpg",
       "carte": "assets/img/residence-obelix-kehlen/03.jpg",
-      "durabilite": "assets/img/buy-penthouse-08-residence-xxc-steinsel/05.jpg",
+      "durabilite": "assets/img/residence-alice-wintrange/02.jpg",
       "estimation": "assets/img/for-sale-house-in-lintgen/01.jpg"
     },
     "hero_video_mp4": "assets/hero/hero.mp4",
@@ -110,7 +110,7 @@ window.DRP_DATA = {
       "id": "senses",
       "nom": "DRP Senses",
       "page": "drp-senses.html",
-      "hero": null,
+      "hero": "assets/entetes/services.jpg",
       "contact": null,
       "liste": null
     },

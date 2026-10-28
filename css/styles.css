@@ -342,14 +342,6 @@ ul { margin: 0; padding: 0; }
 
 /* ---------- DRP Senses ---------- */
 @media (min-width: 1100px) { .ventures--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-/* Kopfbild fehlt noch → Fliesenraster in Slate statt grauem Platzhalter */
-body[data-bereich="senses"] .page-head__img {
-  background-color: var(--slate);
-  background-image: radial-gradient(70% 90% at 70% 20%, rgba(255, 255, 255, .12), transparent 70%),
-    linear-gradient(rgba(255, 255, 255, .07) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, .07) 1px, transparent 1px);
-  background-size: auto, 64px 64px, 64px 64px;
-}
-body[data-bereich="senses"] .page-head__img > .ph { display: none; }
 .ventures--static .venture { pointer-events: none; }
 @media (min-width: 701px) { .ventures--static .venture { min-height: clamp(240px, 22vw, 320px); } } /* nur Info: keine Klick-/Hover-Animation */
 .senses-words { overflow: hidden; padding: clamp(32px, 6vw, 88px) 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
@@ -781,4 +773,40 @@ html.rv-on .rv.rv-in { opacity: 1; translate: 0 0; transition: opacity .9s cubic
 }
 .gallery__main .fav-btn { top: 16px; right: 16px; width: 52px; height: 52px; z-index: 3; }
 .gallery__main .fav-btn .i-heart { width: 24px; height: 24px; }
+
+/* ---------- Galerie-Pfeile: Pfeil genau in der Mitte ---------- */
+.icon-btn { display: inline-grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 0; background: var(--white); color: var(--slate); cursor: pointer; transition: background .2s; }
+.icon-btn:hover { background: var(--off); }
+.icon-btn svg { display: block; }
+
+/* ---------- Nachhaltigkeit: Samen wird gepflanzt, Spross wächst ---------- */
+.seed-art { aspect-ratio: 4 / 5; display: grid; place-items: center; background: var(--white); border: 1px solid var(--line); }
+.seed-art svg { width: 82%; height: auto; overflow: visible; fill: none; stroke: var(--slate); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.sa-seed { fill: var(--slate); stroke: none; }
+.seed-art .sa-d { stroke-dasharray: 1; stroke-dashoffset: 1; }
+.seed-art .sa-seed { opacity: 0; }
+.seed-art .sa-leaves { transform-box: fill-box; transform-origin: 30% 100%; }
+.seed-art.is-play .sa-1 { animation: saDraw 1.3s ease-out forwards; }
+.seed-art.is-play .sa-2 { animation: saDraw 1s ease-out .2s forwards; }
+.seed-art.is-play .sa-seed { animation: saSeed 1.3s cubic-bezier(.55, 0, .75, .6) 1.4s forwards; }
+.seed-art.is-play .sa-3 { animation: saDraw .7s ease-out 2.6s forwards; }
+.seed-art.is-play .sa-4 { animation: saDraw 1.6s cubic-bezier(.22, 1, .36, 1) 3.1s forwards; }
+.seed-art.is-play .sa-5 { animation: saDraw 1.1s ease-out 4.2s forwards; }
+.seed-art.is-play .sa-leaves { animation: saSway 4s ease-in-out 5.4s infinite alternate; }
+.seed-art.is-play .sa-hand { animation: saHand 1s ease 3s forwards; }
+.seed-art.is-done .sa-d { stroke-dashoffset: 0; }
+.seed-art.is-done .sa-hand { opacity: .35; }
+@keyframes saDraw { to { stroke-dashoffset: 0; } }
+@keyframes saSeed { 0% { opacity: 1; transform: translate(0, 0); } 85% { opacity: 1; } 100% { opacity: 0; transform: translate(-30px, 200px); } }
+@keyframes saHand { to { opacity: .35; } }
+@keyframes saSway { from { transform: rotate(-2.5deg); } to { transform: rotate(2.5deg); } }
+@media (prefers-reduced-motion: reduce) { .seed-art .sa-d { stroke-dashoffset: 0; animation: none !important; } .seed-art .sa-seed { display: none; } .seed-art .sa-leaves, .seed-art .sa-hand { animation: none !important; } }
+
+/* ---------- Datenschutz ---------- */
+.legal { padding-top: clamp(32px, 5vw, 64px); }
+.legal__note { padding: 14px 18px; margin-bottom: 32px; background: var(--off); border-left: 2px solid var(--slate); font-size: .92rem; }
+.legal .prose h2 { margin: 40px 0 12px; font-size: 1.15rem; font-weight: 400; color: var(--slate); }
+.legal .prose p, .legal .prose li { font-size: .95rem; line-height: 1.65; }
+.legal .prose ul { margin: 0 0 16px; padding-left: 20px; }
+.legal .prose a { color: var(--slate); overflow-wrap: anywhere; }
 

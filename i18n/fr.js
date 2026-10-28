@@ -1,6 +1,7 @@
 /* Français */
 (window.DRP_I18N = window.DRP_I18N || {}).fr = {
   meta: {
+    privacy: "Protection des données – DRP Group",
     favorites: "Favoris – DRP Group",
     services: "Services – DRP Group",
     home: "DRP Group – Immobilier au Luxembourg",
@@ -52,6 +53,9 @@
     native: "Partager…",
     msg: "Regarde ceci chez DRP Group : {t}",
     list_msg: "Mes favoris chez DRP Group :"
+  },
+  legal: {
+    only_en: "La politique de confidentialité n’existe actuellement qu’en anglais."
   },
   common: {
     skip: "Aller au contenu",
@@ -272,6 +276,7 @@
     green: "Green Challenge : un arbre planté pour chaque unité vendue."
   },
   sust: {
+    seed_alt: "Une main plante une graine dans la terre, une jeune pousse en sort.",
     title: "Durabilité",
     lead: "« Notre vision repose sur deux piliers : des projets durables et la satisfaction de nos clients. »",
     vision: "La durabilité reste une priorité. Nous développons des bâtiments résidentiels et commerciaux écologiques, synonymes de qualité et de confort. DRP Group défend un développement harmonieux et un bon service envers ses clients et fournisseurs, et s’engage pour un avenir durable.",

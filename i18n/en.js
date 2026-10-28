@@ -1,6 +1,7 @@
 /* English – default language. Texts based on drp-group.lu (Oct. 2026). */
 (window.DRP_I18N = window.DRP_I18N || {}).en = {
   meta: {
+    privacy: "Data privacy – DRP Group",
     favorites: "Favourites – DRP Group",
     services: "Services – DRP Group",
     home: "DRP Group – Real estate in Luxembourg",
@@ -52,6 +53,9 @@
     native: "Share…",
     msg: "Have a look at this on DRP Group: {t}",
     list_msg: "My favourites on DRP Group:"
+  },
+  legal: {
+    only_en: "The privacy policy is currently only available in English."
   },
   common: {
     skip: "Skip to content",
@@ -272,6 +276,7 @@
     green: "Green Challenge: a tree is planted for every unit sold."
   },
   sust: {
+    seed_alt: "A hand plants a seed in the ground and a small sprout grows from it.",
     title: "Sustainability",
     lead: "“Our vision is centred on two categories: sustainable projects and satisfaction for our clients.”",
     vision: "Sustainability remains a top priority. We develop eco-friendly residential and commercial buildings that stand for quality and comfort. DRP Group stands for harmonious development and good service for its clients and suppliers, and is committed to building a sustainable future.",

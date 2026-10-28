@@ -1,6 +1,7 @@
 /* Lëtzebuergesch – ENTWURF, muss vun engem Mammesproochler korrigéiert ginn (kuck OFFEN.md). */
 (window.DRP_I18N = window.DRP_I18N || {}).lb = {
   meta: {
+    privacy: "Dateschutz – DRP Group",
     favorites: "Favoritten – DRP Group",
     services: "Servicer – DRP Group",
     home: "DRP Group – Immobilien zu Lëtzebuerg",
@@ -52,6 +53,9 @@
     native: "Deelen…",
     msg: "Kuck dir dat bei DRP Group un: {t}",
     list_msg: "Meng Favoritten bei DRP Group:"
+  },
+  legal: {
+    only_en: "D’Dateschutzerklärung gëtt et de Moment just op Englesch."
   },
   common: {
     skip: "Direkt bei den Inhalt",
@@ -272,6 +276,7 @@
     green: "Green Challenge: fir all verkaf Eenheet gëtt e Bam geplanzt."
   },
   sust: {
+    seed_alt: "Eng Hand leet e Some an d’Äerd, doraus wiisst e klenge Sprëtz.",
     title: "Nohaltegkeet",
     lead: "„Eis Visioun stécht op zwee Piliere: nohalteg Projeten an zefridde Clienten.“",
     vision: "Nohaltegkeet bleift eng Prioritéit. Mir entwéckelen ëmweltfrëndlech Wunn- a Geschäftsgebaier, déi fir Qualitéit a Komfort stinn. DRP Group steet fir eng harmonesch Entwécklung a gudde Service fir Clienten a Fournisseuren, an engagéiert sech fir eng nohalteg Zukunft.",

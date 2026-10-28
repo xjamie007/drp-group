@@ -31,7 +31,14 @@
     else if (window.DRP_EDIT) s = "\uE000" + key + "\uE001" + s + "\uE002";
     return s;
   }
+  var keepY = null; // Scrollposition über einen Sprachwechsel retten
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest && e.target.closest("[data-lang]");
+    if (b) { e.preventDefault(); setLang(b.getAttribute("data-lang")); }
+  });
   function setLang(l) {
+    keepY = window.scrollY;
+    var m = $("#main"); if (m) m.style.minHeight = m.offsetHeight + "px"; // Seite nicht zusammenfallen lassen
     lang = l;
     try { localStorage.setItem("drp-lang", l); } catch (e) { /* ignore */ }
     var u = new URL(location.href);
@@ -299,8 +306,7 @@
   ];
   function current(p) { return PAGE === p || (p === "biens" && PAGE === "bien") || (p === "projets" && PAGE === "projet") || (p === "team" && PAGE === "membre") ? ' aria-current="page"' : ""; }
   function header() {
-    var subs = D.bereiche.map(function (b) { return '<li><a href="' + b.page + '">' + esc(b.nom) + "</a></li>"; }).join("") +
-      '<li><a href="services.html"' + current("services") + ">" + esc(t("nav.services")) + "</a></li>";
+    var subs = D.bereiche.map(function (b) { return '<li><a href="' + b.page + '">' + esc(b.nom) + "</a></li>"; }).join("");
     $("#header").innerHTML =
       '<header class="site-header"><div class="wrap">' +
       '<a class="logo" href="index.html"><img src="' + esc(D.site.logo || "assets/logo-drp-group.png") + '" width="77" height="46" alt="' + esc(t("common.logo_alt")) + '"></a>' +
@@ -387,14 +393,14 @@
       "<div><h2>" + esc(t("footer.companies")) + "</h2><ul>" + D.bereiche.map(function (b) { return '<li><a href="' + b.page + '">' + esc(b.nom) + "</a></li>"; }).join("") + "</ul></div>" +
       "<div><h2>" + esc(t("footer.group")) + "</h2><ul>" +
       NAV.map(function (n) { return '<li><a href="' + n[1] + '">' + esc(t(n[2])) + "</a></li>"; }).join("") +
-      '<li><a href="services.html">' + esc(t("nav.services")) + '</a></li><li><a href="team.html">' + esc(t("nav.team")) + '</a></li><li><a href="estimation.html">' + esc(t("nav.cta")) + "</a></li></ul></div>" +
+      '<li><a href="team.html">' + esc(t("nav.team")) + '</a></li><li><a href="estimation.html">' + esc(t("nav.cta")) + "</a></li></ul></div>" +
       "<div><h2>" + esc(t("footer.follow")) + '</h2><div class="social">' +
       '<a href="' + s.linkedin + '" target="_blank" rel="noopener" aria-label="LinkedIn (' + esc(t("common.opens_new")) + ')">' + ICON.linkedin + "</a>" +
       '<a href="' + s.instagram + '" target="_blank" rel="noopener" aria-label="Instagram (' + esc(t("common.opens_new")) + ')">' + ICON.instagram + "</a></div>" +
       '<h2 style="margin-top:32px">' + esc(t("common.language")) + "</h2>" + langSwitch() + "</div>" +
       "</div>" +
       '<div class="footer-bottom"><span>© ' + year + " " + esc(s.societe) + ". " + esc(t("footer.rights")) + "</span>" +
-      '<a href="' + s.confidentialite + '" target="_blank" rel="noopener">' + esc(t("footer.privacy")) + "</a>" +
+      '<a href="datenschutz.html"' + current("datenschutz") + ">" + esc(t("footer.privacy")) + "</a>" +
       '<a class="footer-credit" href="https://nave.lu" target="_blank" rel="noopener">Created by Nave</a></div>' +
       "</div></footer>" +
       '<div class="mobile-bar"><a href="' + s.telephones[0].href + '">' + ICON.phone + esc(t("common.call")) + '</a>' + (IS_OBJ ? '<a href="contact.html">' + esc(t("nav.contact")) + "</a>" : '<a href="estimation.html">' + esc(t("nav.cta")) + "</a>") + "</div>";
@@ -1170,12 +1176,43 @@
   pages.bien = function (main) { detailPage(main, "bien"); };
   pages.projet = function (main) { detailPage(main, "projet"); };
 
+  /* Hand legt einen Samen in die Erde, daraus wächst ein Spross – Linien wie die Icons der Unternehmen */
+  function seedArt() {
+    var P = function (cls, d) { return '<path class="' + cls + '" pathLength="1" d="' + d + '"/>'; };
+    return '<div class="seed-art" role="img" aria-label="' + esc(t("sust.seed_alt")) + '"><svg viewBox="0 0 400 500" aria-hidden="true">' +
+      // Hand von rechts oben, Daumen und Zeigefinger halten den Samen
+      '<g class="sa-hand">' +
+      P("sa-d sa-1", "M400 112 C376 113 360 116 346 121") + // Ärmel oben
+      P("sa-d sa-1", "M346 121 C322 124 302 132 288 144 C274 156 262 168 254 179 C250 185 254 191 261 188 C269 184 279 178 291 174") + // Handrücken, Zeigefinger
+      P("sa-d sa-1", "M291 174 C301 177 310 178 318 176 M300 188 C311 192 322 192 333 188 M312 200 C324 204 338 204 352 199") + // gebeugte Finger
+      P("sa-d sa-1", "M352 199 C330 210 296 210 278 200 C268 194 262 191 259 188") + // Daumen bis zur Fingerspitze
+      P("sa-d sa-1", "M346 121 C342 150 344 178 352 199 M400 206 C384 205 368 203 352 199") + // Handgelenk, Ärmel unten
+      "</g>" +
+      // Samen fällt in die Erde
+      '<ellipse class="sa-seed" cx="256" cy="194" rx="5" ry="7"/>' +
+      // Boden, kleiner Erdhügel, Krümel
+      P("sa-d sa-2", "M40 400 H360") + P("sa-d sa-3", "M196 400 C210 384 238 384 252 400") +
+      P("sa-d sa-3", "M120 412 h10 M150 420 h6 M280 414 h12 M310 422 h6") +
+      // Spross: Stiel und zwei Blätter
+      P("sa-d sa-4", "M224 392 C224 360 220 336 226 304") +
+      '<g class="sa-leaves">' + P("sa-d sa-5", "M225 330 C206 314 186 314 178 326 C190 338 210 340 225 330") +
+      P("sa-d sa-5", "M226 312 C240 292 262 288 272 298 C262 312 242 316 226 312") + "</g>" +
+      "</svg></div>";
+  }
+  function initSeedArt(root) {
+    var el = $(".seed-art", root);
+    if (!el) return;
+    if (REDUCED || !("IntersectionObserver" in window)) { el.classList.add("is-done"); return; }
+    var io = new IntersectionObserver(function (es) { if (es[0].isIntersecting) { el.classList.add("is-play"); io.disconnect(); } }, { threshold: 0.4 });
+    io.observe(el);
+    cleanups.push(function () { io.disconnect(); });
+  }
   pages.durabilite = function (main) {
     var green = D.items.filter(function (i) { return i.type === "projet" && txt(i.description).join(" ").indexOf("Green Challenge") > -1; });
     main.innerHTML = pageHead(D.site.entetes.durabilite, t("nav.sustainability")) +
       '<section class="section"><div class="wrap wrap--narrow"><p class="lead">' + esc(t("sust.vision")) + "</p></div></section>" +
       '<section class="section section--off"><div class="wrap"><div class="split">' +
-      img((byId("trinary-reckange-mersch") || { images: [] }).images[0], "", "r-4x5") +
+      seedArt() +
       '<div><span class="eyebrow">' + esc(t("sust.gc_eyebrow")) + '</span><h2 class="h-section">' + esc(t("sust.gc_title")) + "</h2>" +
       '<p class="lead" style="margin-top:24px">' + esc(t("sust.gc_text")) + "</p></div></div></div></section>" +
       '<section class="section"><div class="wrap"><h2 class="h-section" style="margin-bottom:32px">' + esc(t("sust.principles_title")) + '</h2><ul class="principles">' +
@@ -1183,6 +1220,7 @@
       "</ul></div></section>" +
       '<section class="section"><div class="wrap"><h2 class="h-section" style="margin-bottom:40px">' + esc(t("sust.projects_title")) + '</h2><div class="grid">' + green.map(card).join("") + "</div></div></section>" +
       ctaBand();
+    initSeedArt(main);
   };
 
   pages.about = function (main) {
@@ -1219,37 +1257,13 @@
     main.innerHTML = pageHead(D.site.entetes.team, t("nav.team")) + intro(t("team.lead")) + teamSection() + ctaBand();
   };
 
-  pages.services = function (main) {
-    main.innerHTML =
-      pageHead(D.site.entetes.services, t("nav.services")) + intro(t("services.title")) +
-      '<section class="section section--tight"><div class="wrap"><div class="section-head"><div><span class="eyebrow">DRP Luxembourg</span><h2 class="h-section">' + esc(t("services.agency")) + "</h2></div>" +
-      '<a class="link-arrow" href="drp-luxembourg.html">DRP Luxembourg</a></div>' + services("lux", 4) + "</div></section>" +
-      '<section class="section section--tight"><div class="wrap"><div class="section-head"><div><span class="eyebrow">DRP Real Estate</span><h2 class="h-section">' + esc(t("services.dev")) + "</h2></div>" +
-      '<a class="link-arrow" href="drp-real-estate.html">DRP Real Estate</a></div>' + services("re", 3) + "</div></section>" +
-      '<section class="section section--off"><div class="wrap"><div class="split"><div><h2 class="h-section">' + esc(t("services.q_title")) + '</h2><p class="lead" style="margin-top:20px">' + esc(t("services.q_text")) + "</p></div>" +
-      '<div><div class="btn-row"><a class="btn" href="contact.html">' + esc(t("cta.secondary")) + '</a><a class="btn btn--ghost" href="estimation.html">' + esc(t("nav.cta")) + "</a></div>" + ctaNote() + "</div></div></div></section>" +
-      ctaBand();
-  };
-
-  pages.membre = function (main) {
-    var m = member(param("id"));
-    if (!m || !txt(m.bio).length) { pages.notfound(main); return; }
-    document.title = m.nom + " – DRP Group";
-    main.innerHTML =
-      '<div class="wrap"><nav class="breadcrumb" aria-label="Breadcrumb" style="padding-top:clamp(32px,5vw,64px)"><a href="index.html">DRP Group</a> / <a href="team.html">' + esc(t("nav.team")) + "</a></nav>" +
-      '<div class="split split--top" style="padding:clamp(16px,3vw,40px) 0 clamp(64px,10vw,140px)">' +
-      '<div style="max-width:440px">' + img(m.photo_profil || m.photo, m.nom, "r-2x3", true) + "</div>" +
-      '<div><span class="eyebrow">' + esc(m.role) + '</span><h1 class="h-display">' + esc(m.nom) + '</h1><div class="prose" style="margin-top:32px">' + prose(txt(m.bio)) + "</div>" +
-      '<div class="btn-row" style="margin-top:32px"><a class="btn" href="contact.html">' + esc(t("cta.secondary")) + '</a><a class="btn btn--ghost" href="team.html">' + esc(t("team.back")) + "</a></div></div></div></div>" +
-      ctaBand();
-  };
-
-  pages.notfound = function (main) {
-    document.title = t("meta.notfound");
-    main.innerHTML =
-      '<div class="wrap wrap--narrow" style="padding:clamp(80px,14vw,180px) var(--gutter)"><span class="eyebrow">404</span><h1 class="h-display">' + esc(t("notfound.title")) + "</h1>" +
-      '<p class="lead" style="margin-top:24px">' + esc(t("notfound.text")) + "</p>" +
-      '<div class="btn-row" style="margin-top:32px"><a class="btn" href="index.html">' + esc(t("notfound.home")) + '</a><a class="btn btn--ghost" href="biens.html">' + esc(t("nav.properties")) + '</a><a class="btn btn--ghost" href="contact.html">' + esc(t("nav.contact")) + "</a></div></div>";
+  /* Datenschutzerklärung (Text der alten Seite, legal.js) – nur auf Englisch vorhanden */
+  pages.datenschutz = function (main) {
+    var L = (window.DRP_LEGAL || {}).privacy || {};
+    main.innerHTML = pageHead(D.site.entetes.contact, t("footer.privacy")) +
+      '<div class="wrap wrap--narrow legal">' + (lang !== "en" ? '<p class="legal__note" lang="' + lang + '">' + esc(t("legal.only_en")) + "</p>" : "") +
+      '<div class="prose" lang="en">' + (L.en || "") + "</div></div>" +
+      '<div style="height:clamp(64px,10vw,140px)"></div>';
   };
 
   pages.contact = function (main) {
@@ -1400,19 +1414,20 @@
     document.documentElement.lang = lang;
     var fav = $('link[rel="icon"]'); if (fav && D.site.logo && fav.getAttribute("href") !== D.site.logo) fav.href = D.site.logo;
     var metaKey = { home: "home", biens: "properties", bien: "properties", projets: "projects", projet: "projects", carte: "map", durabilite: "sustainability",
-      estimation: "valuation", about: "about", team: "team", membre: "team", contact: "contact", services: "services", notfound: "notfound", bereich: "home", merkliste: "favorites" }[PAGE];
+      estimation: "valuation", about: "about", team: "team", membre: "team", contact: "contact", services: "services", notfound: "notfound", bereich: "home", merkliste: "favorites", datenschutz: "privacy" }[PAGE];
     document.title = t("meta." + metaKey);
     $(".skip-link").textContent = t("common.skip");
     header();
     initHero();
     var main = $("#main");
     main.innerHTML = "";
-    $$("[data-lang]").forEach(function (b) { b.addEventListener("click", function () { setLang(b.dataset.lang); }); });
     function fill() {
       // im Admin gelöschte Seite: Besucher sehen „nicht gefunden“, der Admin sieht sie weiter (zum Wiederherstellen)
       var pg = !window.DRP_EDIT && isHidden(location.pathname) ? "notfound" : PAGE;
       if (pages[pg]) pages[pg](main);
-      footer(); pruneLinks(); reveal(main); APP.rendered(main);
+      footer(); pruneLinks();
+      if (keepY !== null) { main.style.minHeight = ""; window.scrollTo({ top: keepY, behavior: "instant" }); keepY = null; }
+      reveal(main); APP.rendered(main);
     }
     // Startseite: alles unter dem Hero erst nach dem ersten Paint aufbauen, damit das Hero-Foto zuerst lädt
     var hero = $(".hero__media img");

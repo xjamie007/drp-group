@@ -691,7 +691,7 @@
   function loadPlaces() {
     if (window.DRP_PLACES) return Promise.resolve(window.DRP_PLACES);
     return placesP || (placesP = new Promise(function (res) {
-      var sc = document.createElement('script'); sc.src = 'js/places.js?v=20261028c'; sc.onload = function () { res(window.DRP_PLACES || []); }; sc.onerror = function () { res([]); };
+      var sc = document.createElement('script'); sc.src = 'js/places.js?v=20261028d'; sc.onload = function () { res(window.DRP_PLACES || []); }; sc.onerror = function () { res([]); };
       document.head.appendChild(sc);
     }));
   }
@@ -755,7 +755,7 @@
 
   /* ------------------------------------------------------------ Seiten, Google, Mehr */
   var PAGES = [['index.html', 'Startseite'], ['biens.html', 'Immobilien'], ['projets.html', 'Projekte'], ['carte.html', 'Karte'], ['durabilite.html', 'Nachhaltigkeit'],
-    ['about.html', 'Über uns'], ['team.html', 'Team'], ['services.html', 'Leistungen'], ['contact.html', 'Kontakt'], ['estimation.html', 'Kostenlose Bewertung'],
+    ['about.html', 'Über uns'], ['team.html', 'Team'], ['contact.html', 'Kontakt'], ['datenschutz.html', 'Datenschutz'], ['estimation.html', 'Kostenlose Bewertung'],
     ['drp-luxembourg.html', 'DRP Luxembourg'], ['drp-real-estate.html', 'DRP Real Estate'], ['drp-senses.html', 'DRP Senses'], ['drp-architecture.html', 'DRP Architecture'], ['merkliste.html', 'Merkliste']];
   function go(href) {
     if (!dirty) { location.href = href; return; }
