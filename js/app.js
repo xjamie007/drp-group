@@ -944,7 +944,9 @@
         "</tbody></table></div>";
     }
     var listUrl = shareUrl("merkliste.html?ids=" + ids.map(encodeURIComponent).join(","));
-    main.innerHTML = pageHead(D.site.entetes.biens, t("fav.title")) + '<div class="wrap fav-page">' +
+    // Kopf: die gemerkten Objekte wechseln sich ab (je Projekt ein Foto); leere Merkliste: alle Immobilien
+    var favPhotos = headPhotos(ids.map(byId));
+    main.innerHTML = pageHead(favPhotos.length ? favPhotos : headPhotos(D.items.filter(function (i) { return i.type === "bien"; })), t("fav.title")) + '<div class="wrap fav-page">' +
       '<div class="page-intro"><p class="lead">' + esc(t(shared ? "fav.shared_lead" : "fav.lead")) + "</p>" +
       (shared && ids.length ? '<button type="button" class="btn" data-add-all>' + ICON.heart + " " + esc(t("fav.add_all")) + "</button>" : "") + "</div>" +
       (ids.length ?
@@ -965,6 +967,7 @@
         $("[data-cmp-out]", main).innerHTML = compare();
       });
     });
+    headIdx = 0; initHeadSlides(main);
     var add = $("[data-add-all]", main);
     if (add) add.addEventListener("click", function () {
       var list = favGet(); ids.forEach(function (id) { if (list.indexOf(id) < 0) list.push(id); }); favSet(list); favSync();
