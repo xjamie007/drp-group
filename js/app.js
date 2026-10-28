@@ -410,7 +410,11 @@
   }
   /* Seitenkopf wie auf der alten Website: Foto, darüber weißer Kasten mit Logo | Linie | Überschrift */
   function pageHead(src, heading, sub) {
-    return '<section class="page-head"><div class="page-head__img">' + (src ? '<img src="' + esc(src) + '" alt="" fetchpriority="high">' : ph()) + "</div>" +
+    // src als Liste: Fotos überblenden nacheinander (initHeadSlides); nur das erste lädt sofort
+    var media = Array.isArray(src) && src.length > 1
+      ? src.map(function (x, i) { return '<img class="ph-slide' + (i ? "" : " is-on") + '" ' + (i ? 'data-src="' : 'fetchpriority="high" src="') + esc(x) + '" alt="">'; }).join("")
+      : (Array.isArray(src) ? src[0] : src) ? '<img src="' + esc(Array.isArray(src) ? src[0] : src) + '" alt="" fetchpriority="high">' : ph();
+    return '<section class="page-head"><div class="page-head__img"' + (Array.isArray(src) && src.length > 1 ? " data-slides" : "") + ">" + media + "</div>" +
       '<div class="page-head__box"><img class="page-head__logo" src="' + esc(D.site.logo || "assets/logo-drp-group.png") + '" width="120" height="72" alt="">' +
       '<span class="page-head__rule" aria-hidden="true"></span><div class="page-head__text">' +
       (sub ? '<span class="eyebrow">' + esc(sub) + "</span>" : "") + "<h1>" + esc(heading) + "</h1></div></div></section>";
@@ -862,6 +866,39 @@
     return '<section class="section section--tight" style="padding-top:0"><div class="wrap"><h2 class="visually-hidden">' + esc(t("page.services")) + "</h2>" + inner + "</div></section>";
   }
 
+  /* Kopfbild als langsame Diashow: alle 6 s weich überblenden, Endlosschleife; steht still bei „Bewegung reduzieren“
+     und wenn der Tab im Hintergrund ist. Die Stelle merkt sich headIdx, damit ein Filterwechsel nicht von vorn beginnt. */
+  var headIdx = 0;
+  function initHeadSlides(root) {
+    var box = $(".page-head__img[data-slides]", root);
+    if (!box || REDUCED) return;
+    var imgs = $$(".ph-slide", box), n = imgs.length;
+    function load(i) { var im = imgs[i]; if (im && !im.getAttribute("src")) im.src = im.getAttribute("data-src"); }
+    function show(i) {
+      headIdx = (i + n) % n; load(headIdx);
+      imgs.forEach(function (im, k) { im.classList.toggle("is-on", k === headIdx); });
+      load((headIdx + 1) % n); // nächstes schon laden
+    }
+    if (headIdx) show(headIdx); else load(1);
+    var timer = setInterval(function () {
+      if (!box.isConnected) { clearInterval(timer); return; }
+      if (document.hidden) return;
+      var next = (headIdx + 1) % n, im = imgs[next];
+      if (im.complete && im.naturalWidth) show(next); else load(next); // erst zeigen, wenn geladen
+    }, 6000);
+    cleanups.push(function () { clearInterval(timer); });
+  }
+  // je Projekt nur ein Foto (mehrere Wohnungen desselben Projekts zeigen sonst dasselbe Bild)
+  function headPhotos(list) {
+    var seen = {}, out = [];
+    list.forEach(function (it) {
+      var key = it.projet || it.id; if (seen[key]) return; seen[key] = 1;
+      var parent = it.projet && byId(it.projet), src = (parent && parent.images[0]) || it.images[0];
+      if (src && out.indexOf(src) < 0) out.push(src);
+    });
+    return out;
+  }
+
   function listPage(main, type) {
     var all = D.items.filter(function (i) { return i.type === type; });
     var isB = type === "bien";
@@ -876,7 +913,7 @@
       var res = all.filter(function (i) {
         return (!st.type || i.categorie === st.type) && (!st.statut || i.statut === st.statut) && (!st.bereich || i.bereich === st.bereich) && (!st.commune || i.localite === st.commune);
       });
-      main.innerHTML = pageHead(D.site.entetes[isB ? "biens" : "projets"], t(isB ? "nav.properties" : "nav.projects")) +
+      main.innerHTML = pageHead(isB ? headPhotos(all) : D.site.entetes.projets, t(isB ? "nav.properties" : "nav.projects")) +
         '<div class="wrap"><div class="page-intro">' +
         '<p class="lead">' + esc(t(isB ? "list.properties_lead" : "list.projects_lead")) + "</p></div>" +
         filtersHtml(defs, st, res.length) +
@@ -884,6 +921,7 @@
           : '<p class="empty">' + esc(t("common.none")) + ' <a href="' + location.pathname.split("/").pop() + '">' + esc(t("common.reset")) + "</a></p>") +
         '</div><div style="height:clamp(64px,10vw,140px)"></div>' + ctaBand();
       bindFilters(main, st, function (el) { draw(el); });
+      initHeadSlides(main);
       refocus(focusEl);
     }
     draw();
