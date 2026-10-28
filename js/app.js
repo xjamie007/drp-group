@@ -1229,7 +1229,7 @@
   pages.about = function (main) {
     var p = function (id, n) { return (byId(id) || { images: [] }).images[n || 0]; };
     // Über uns: Kopf wie alte About-Seite, dann das Team, darunter der Rest der Seite
-    main.innerHTML = pageHead(D.site.entetes.about, t("nav.about")) + intro(t("about.h1")) + teamSection() +
+    main.innerHTML = titleHead(t("nav.about"), t("about.h1")) + teamSection() +
       '<section class="section section--off"><div class="wrap"><div class="split">' + img(p("residences-blanchy-rene-bascharage", 1), "", "r-4x5") +
       '<div><p class="lead">' + esc(t("about.p1")) + "</p></div></div></div></section>" +
       '<section class="section"><div class="wrap"><div class="split"><div><h2 class="h-section">' + esc(t("about.h2")) + '</h2><p class="lead" style="margin-top:24px">' + esc(t("sust.vision")) + "</p>" +
@@ -1260,11 +1260,14 @@
     main.innerHTML = pageHead(D.site.entetes.team, t("nav.team")) + intro(t("team.lead")) + teamSection() + ctaBand();
   };
 
+  // Seitenanfang ohne Foto, nur der Titel (wie beim Datenschutz)
+  function titleHead(text, lead) { return '<div class="wrap page-title"><h1 class="h-display">' + esc(text) + "</h1>" + (lead ? '<p class="lead">' + esc(lead) + "</p>" : "") + "</div>"; }
+
   /* Datenschutzerklärung (Text der alten Seite, legal.js) – nur auf Englisch vorhanden */
   pages.datenschutz = function (main) {
     var L = (window.DRP_LEGAL || {}).privacy || {};
     // ohne Kopfbild, Text über die ganze Breite
-    main.innerHTML = '<div class="wrap legal"><h1 class="h-display">' + esc(t("footer.privacy")) + "</h1>" +
+    main.innerHTML = titleHead(t("footer.privacy")) + '<div class="wrap legal">' +
       (lang !== "en" ? '<p class="legal__note" lang="' + lang + '">' + esc(t("legal.only_en")) + "</p>" : "") +
       '<div class="prose" lang="en">' + (L.en || "") + "</div></div>" +
       '<div style="height:clamp(64px,10vw,140px)"></div>';
@@ -1275,7 +1278,7 @@
     var ref = byId(param("ref"));
     var visit = param("sujet") === "visite";
     main.innerHTML =
-      pageHead(D.site.entetes.contact, t("nav.contact")) + intro(t("contact.lead")) +
+      titleHead(t("nav.contact"), t("contact.lead")) +
       '<div class="wrap"><div class="split split--top" style="padding:clamp(48px,6vw,96px) 0 clamp(64px,10vw,140px)"><div>' +
       '<ul class="keyfacts" style="margin-bottom:32px">' +
       "<li><span>" + esc(t("contact.address")) + "</span><span>" + esc(s.societe) + "<br>" + s.adresse.map(esc).join("<br>") + "<br><small class=\"muted\">(" + esc(s.adresse_note) + ")</small></span></li>" +
