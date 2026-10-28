@@ -913,7 +913,7 @@
       var res = all.filter(function (i) {
         return (!st.type || i.categorie === st.type) && (!st.statut || i.statut === st.statut) && (!st.bereich || i.bereich === st.bereich) && (!st.commune || i.localite === st.commune);
       });
-      main.innerHTML = pageHead(isB ? headPhotos(all) : D.site.entetes.projets, t(isB ? "nav.properties" : "nav.projects")) +
+      main.innerHTML = pageHead(headPhotos(all), t(isB ? "nav.properties" : "nav.projects")) + // Diashow der Immobilien bzw. Projekte
         '<div class="wrap"><div class="page-intro">' +
         '<p class="lead">' + esc(t(isB ? "list.properties_lead" : "list.projects_lead")) + "</p></div>" +
         filtersHtml(defs, st, res.length) +
