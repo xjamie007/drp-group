@@ -779,36 +779,32 @@ html.rv-on .rv.rv-in { opacity: 1; translate: 0 0; transition: opacity .9s cubic
 .icon-btn:hover { background: var(--off); }
 .icon-btn svg { display: block; }
 
-/* ---------- Nachhaltigkeit: Samen wird gepflanzt, Spross wächst ---------- */
-.seed-art { aspect-ratio: 4 / 5; display: grid; place-items: center; background: var(--white); border: 1px solid var(--line); }
-.seed-art svg { width: 82%; height: auto; overflow: visible; fill: none; stroke: var(--slate); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
-.sa-seed { fill: var(--slate); stroke: none; }
-.seed-art .sa-d { stroke-dasharray: 1; stroke-dashoffset: 1; }
-.seed-art .sa-seed { opacity: 0; }
-.seed-art .sa-tree { transform-box: fill-box; transform-origin: 50% 100%; }
-.seed-art .sa-sprout { transition: opacity .8s ease; }
-/* Ablauf: Hand → Samen fällt → Erdhügel → Spross → Baum (Stamm, Äste, Krone) → Krone wiegt sich */
-.seed-art.is-play .sa-1 { animation: saDraw 1.3s ease-out forwards; }
-.seed-art.is-play .sa-2 { animation: saDraw 1s ease-out .2s forwards; }
-.seed-art.is-play .sa-seed { animation: saSeed 1.2s cubic-bezier(.55, 0, .75, .6) 1.4s forwards; }
-.seed-art.is-play .sa-3 { animation: saDraw .6s ease-out 2.5s forwards; }
-.seed-art.is-play .sa-hand { animation: saHand 1s ease 2.8s forwards; }
-.seed-art.is-play .sa-4 { animation: saDraw 1s cubic-bezier(.22, 1, .36, 1) 3s forwards; }
-.seed-art.is-play .sa-5 { animation: saDraw .8s ease-out 3.7s forwards; }
-.seed-art.is-play .sa-sprout { animation: saFade .7s ease 5s forwards; }
-.seed-art.is-play .sa-6 { animation: saDraw 1.3s cubic-bezier(.22, 1, .36, 1) 5.1s forwards; }
-.seed-art.is-play .sa-7 { animation: saDraw .9s ease-out 6.1s forwards; }
-.seed-art.is-play .sa-8 { animation: saDraw 1.6s ease-in-out 6.7s forwards; }
-.seed-art.is-play .sa-tree { animation: saSway 5s ease-in-out 8.4s infinite alternate; }
-.seed-art.is-done .sa-d { stroke-dashoffset: 0; }
-.seed-art.is-done .sa-sprout { opacity: 0; }
-.seed-art.is-done .sa-hand { opacity: .25; }
-@keyframes saDraw { to { stroke-dashoffset: 0; } }
-@keyframes saSeed { 0% { opacity: 1; transform: translate(0, 0); } 85% { opacity: 1; } 100% { opacity: 0; transform: translate(-36px, 222px); } }
-@keyframes saHand { to { opacity: .25; } }
-@keyframes saFade { to { opacity: 0; } }
-@keyframes saSway { from { transform: rotate(-1.2deg); } to { transform: rotate(1.2deg); } }
-@media (prefers-reduced-motion: reduce) { .seed-art .sa-d { stroke-dashoffset: 0; animation: none !important; } .seed-art .sa-seed, .seed-art .sa-sprout { display: none; } .seed-art .sa-tree, .seed-art .sa-hand { animation: none !important; } .seed-art .sa-hand { opacity: .25; } }
+/* ---------- Nachhaltigkeit: Hand pflanzt einen Samen, ein Baum wächst ---------- */
+.seed-art { position: relative; aspect-ratio: 4 / 5; background: var(--white); border: 1px solid var(--line); color: var(--slate); overflow: hidden; }
+.sa-layer { position: absolute; inset: 4% 4% 0; width: 92%; height: 96%; fill: currentColor; }
+/* Ausgangslage vor dem Start: alles verborgen */
+.seed-art.is-play .sa-handl, .seed-art:not(.is-done) .sa-handl { clip-path: inset(0 0 0 100%); }
+.seed-art:not(.is-done) .sa-ground { clip-path: inset(79.4% 100% 0 0); }
+.seed-art:not(.is-done) .sa-tree { clip-path: inset(79.4% 0 20.6% 0); }
+.seed-art:not(.is-done) .sa-seedl, .sa-cover { opacity: 0; }
+.sa-tree { transform-origin: 50.8% 83.5%; }
+/* Ablauf */
+.seed-art.is-play .sa-handl { animation: saHandIn 1.4s cubic-bezier(.22, 1, .36, 1) forwards, saHandFade 1s ease 3.6s forwards; }
+.seed-art.is-play .sa-ground { animation: saGround 1.2s ease-out .3s forwards; }
+.seed-art.is-play .sa-seedl { animation: saSeed 1.3s cubic-bezier(.55, 0, .75, .6) 1.6s forwards; }
+.seed-art.is-play .sa-cover { animation: saCover .01s linear 1.6s forwards; }
+.seed-art.is-done .sa-cover { opacity: 1; }
+.seed-art.is-play .sa-tree { animation: saGrow 3s cubic-bezier(.45, 0, .2, 1) 2.9s forwards, saSway 5s ease-in-out 6s infinite alternate; }
+.seed-art.is-done .sa-handl { opacity: .3; }
+.seed-art.is-done .sa-seedl { display: none; }
+@keyframes saHandIn { to { clip-path: inset(0 0 0 0); } }
+@keyframes saCover { to { opacity: 1; } }
+@keyframes saHandFade { to { opacity: .3; } }
+@keyframes saGround { to { clip-path: inset(79.4% 0 0 0); } }
+@keyframes saSeed { 0% { opacity: 1; transform: translate(0, 0); } 85% { opacity: 1; } 100% { opacity: 0; transform: translate(-1.6%, 45%); } }
+@keyframes saGrow { from { clip-path: inset(79.4% 0 20.6% 0); } to { clip-path: inset(0 0 22% 0); } }
+@keyframes saSway { from { transform: rotate(-1deg); } to { transform: rotate(1deg); } }
+@media (prefers-reduced-motion: reduce) { .seed-art .sa-layer { animation: none !important; } }
 
 /* ---------- Datenschutz ---------- */
 .page-title { padding-top: clamp(40px, 6vw, 88px); } /* Seitenanfang ohne Foto: Über uns, Kontakt, Datenschutz */
