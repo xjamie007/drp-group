@@ -687,7 +687,7 @@
         '<div class="fpc__meta"><span class="fpc__city">' + esc(it.localite) + '</span><span class="fpc__price">' + esc(priceText(it)) + "</span></div>" +
         '<h3 class="fpc__title">' + esc(it.titre) + "</h3>" +
         '<div class="fpc__stats"><div class="fpc__stats-main">' + stats.map(function (x) { return "<span>" + esc(x) + "</span>"; }).join('<span class="fpc__sep"></span>') + "</div>" +
-        '<span class="fpc__arrow">' + ARROW + "</span></div></a>", dir);
+        "</div></a>", dir); // ohne Pfeil: sah aus wie „weiterblättern“
       tick();
     }
     // läuft von selbst weiter; Pause per Knopf, beim Drüberfahren/Fokus, außerhalb des Bildschirms; nicht bei „weniger Bewegung“
@@ -872,7 +872,7 @@
     return '<section class="section section--tight" style="padding-top:0"><div class="wrap"><h2 class="visually-hidden">' + esc(t("page.services")) + "</h2>" + inner + "</div></section>";
   }
 
-  /* Kopfbild als langsame Diashow: alle 6 s weich überblenden, Endlosschleife; steht still bei „Bewegung reduzieren“
+  /* Kopfbild als Diashow: alle 4 s weich überblenden, Endlosschleife; steht still bei „Bewegung reduzieren“
      und wenn der Tab im Hintergrund ist. Die Stelle merkt sich headIdx, damit ein Filterwechsel nicht von vorn beginnt. */
   var headIdx = 0;
   function initHeadSlides(root) {
@@ -891,7 +891,7 @@
       if (document.hidden) return;
       var next = (headIdx + 1) % n, im = imgs[next];
       if (im.complete && im.naturalWidth) show(next); else load(next); // erst zeigen, wenn geladen
-    }, 6000);
+    }, 4000);
     cleanups.push(function () { clearInterval(timer); });
   }
   // je Projekt nur ein Foto (mehrere Wohnungen desselben Projekts zeigen sonst dasselbe Bild)
@@ -1180,24 +1180,27 @@
   function seedArt() {
     var P = function (cls, d) { return '<path class="' + cls + '" pathLength="1" d="' + d + '"/>'; };
     return '<div class="seed-art" role="img" aria-label="' + esc(t("sust.seed_alt")) + '"><svg viewBox="0 0 400 500" aria-hidden="true">' +
-      // Hand von rechts oben, Daumen und Zeigefinger halten den Samen
+      // Hand von rechts oben: Ärmel, Handrücken, ausgestreckter Zeigefinger, Daumen, angedeutete Finger
       '<g class="sa-hand">' +
-      P("sa-d sa-1", "M400 112 C376 113 360 116 346 121") + // Ärmel oben
-      P("sa-d sa-1", "M346 121 C322 124 302 132 288 144 C274 156 262 168 254 179 C250 185 254 191 261 188 C269 184 279 178 291 174") + // Handrücken, Zeigefinger
-      P("sa-d sa-1", "M291 174 C301 177 310 178 318 176 M300 188 C311 192 322 192 333 188 M312 200 C324 204 338 204 352 199") + // gebeugte Finger
-      P("sa-d sa-1", "M352 199 C330 210 296 210 278 200 C268 194 262 191 259 188") + // Daumen bis zur Fingerspitze
-      P("sa-d sa-1", "M346 121 C342 150 344 178 352 199 M400 206 C384 205 368 203 352 199") + // Handgelenk, Ärmel unten
-      "</g>" +
-      // Samen fällt in die Erde
-      '<ellipse class="sa-seed" cx="256" cy="194" rx="5" ry="7"/>' +
-      // Boden, kleiner Erdhügel, Krümel
-      P("sa-d sa-2", "M40 400 H360") + P("sa-d sa-3", "M196 400 C210 384 238 384 252 400") +
-      P("sa-d sa-3", "M120 412 h10 M150 420 h6 M280 414 h12 M310 422 h6") +
-      // Spross: Stiel und zwei Blätter
-      P("sa-d sa-4", "M224 392 C224 360 220 336 226 304") +
-      '<g class="sa-leaves">' + P("sa-d sa-5", "M225 330 C206 314 186 314 178 326 C190 338 210 340 225 330") +
-      P("sa-d sa-5", "M226 312 C240 292 262 288 272 298 C262 312 242 316 226 312") + "</g>" +
-      "</svg></div>";
+      P("sa-d sa-1", "M400 92 L360 97 C354 122 354 150 361 174 L400 180") +
+      P("sa-d sa-1", "M360 97 C338 99 316 106 298 119 C282 131 268 146 257 162 C251 170 254 179 263 177 C273 173 283 165 294 157") +
+      P("sa-d sa-1", "M361 174 C336 179 306 182 284 184 C273 185 266 187 262 190 C256 195 259 201 267 200 C281 198 296 193 310 187") +
+      P("sa-d sa-1", "M294 157 C303 162 307 170 303 177 M313 152 C322 157 325 166 321 173 M331 148 C339 152 341 160 338 167") +
+      P("sa-d sa-1", "M268 151 C271 154 272 158 270 162") + "</g>" +
+      '<ellipse class="sa-seed" cx="262" cy="186" rx="5" ry="7"/>' +
+      // Boden mit Erdhügel und Krümeln
+      P("sa-d sa-2", "M40 420 H360") + P("sa-d sa-3", "M198 420 C210 404 240 404 252 420") +
+      P("sa-d sa-3", "M112 432 h12 M146 440 h6 M286 434 h12 M318 442 h6") +
+      // erst ein Spross …
+      '<g class="sa-sprout">' + P("sa-d sa-4", "M226 412 C226 392 224 378 228 362") +
+      P("sa-d sa-5", "M227 382 C212 370 196 370 190 380 C200 390 216 390 227 382") +
+      P("sa-d sa-5", "M228 368 C240 352 258 350 266 358 C258 370 242 374 228 368") + "</g>" +
+      // … dann ein kleiner Baum: Stamm, Äste, Krone
+      '<g class="sa-tree">' + P("sa-d sa-6", "M220 412 C221 386 220 364 222 344 M232 412 C231 386 232 364 230 344") +
+      P("sa-d sa-7", "M221 378 C212 370 202 366 191 366 M231 364 C240 356 250 352 261 352") +
+      // Krone verkleinert unter die Hand gesetzt; Linienstärke bleibt gleich
+      '<g transform="translate(226 296) scale(.78) translate(-226 -262)">' + P("sa-d sa-8", "M150 300 C128 300 118 278 132 262 C122 240 142 218 166 226 C170 200 202 190 220 206 C236 184 270 190 274 214 C300 210 318 234 306 256 C324 272 314 302 288 302 C276 320 248 322 236 308 C222 322 192 322 182 306 C168 316 150 312 150 300 Z").replace("<path", '<path vector-effect="non-scaling-stroke"') + "</g>" +
+      "</g></svg></div>";
   }
   function initSeedArt(root) {
     var el = $(".seed-art", root);
@@ -1260,8 +1263,9 @@
   /* Datenschutzerklärung (Text der alten Seite, legal.js) – nur auf Englisch vorhanden */
   pages.datenschutz = function (main) {
     var L = (window.DRP_LEGAL || {}).privacy || {};
-    main.innerHTML = pageHead(D.site.entetes.contact, t("footer.privacy")) +
-      '<div class="wrap wrap--narrow legal">' + (lang !== "en" ? '<p class="legal__note" lang="' + lang + '">' + esc(t("legal.only_en")) + "</p>" : "") +
+    // ohne Kopfbild, Text über die ganze Breite
+    main.innerHTML = '<div class="wrap legal"><h1 class="h-display">' + esc(t("footer.privacy")) + "</h1>" +
+      (lang !== "en" ? '<p class="legal__note" lang="' + lang + '">' + esc(t("legal.only_en")) + "</p>" : "") +
       '<div class="prose" lang="en">' + (L.en || "") + "</div></div>" +
       '<div style="height:clamp(64px,10vw,140px)"></div>';
   };

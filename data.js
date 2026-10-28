@@ -65,7 +65,7 @@ window.DRP_DATA = {
     "hero_image": "assets/hero/hero.jpg",
     "logo": "assets/logo-drp-group.png",
     "entetes": {
-      "about": "assets/entetes/about.jpg",
+      "about": "assets/entetes/team.jpg",
       "services": "assets/entetes/services.jpg",
       "biens": "assets/entetes/projets.jpg",
       "projets": "assets/entetes/projets.jpg",
