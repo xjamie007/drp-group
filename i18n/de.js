@@ -197,12 +197,13 @@
     ba_label: "Vergleich vorher / nachher"
   },
   senses: {
-    intro: "DRP Senses verkauft Möbel, Fliesen und Baustoffe in Luxemburg.",
+    intro: "DRP Senses verkauft Möbel und Baustoffe in Luxemburg, verlegt Fliesen und übernimmt auf Anfrage auch Bauarbeiten.",
     s1_t: "Möbel",
     s2_t: "Fliesen",
     s3_t: "Baustoffe",
+    s4_t: "Bauarbeiten auf Anfrage",
     words: "Fliesen · Möbel · Baustoffe",
-    words2: "Möbel · Baustoffe · Fliesen"
+    words2: "Möbel · Bauarbeiten · Baustoffe · Fliesen"
   },
   arch: {
     film_label: "DRP Architecture – Film",

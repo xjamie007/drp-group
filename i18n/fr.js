@@ -197,12 +197,13 @@
     ba_label: "Comparaison avant / après"
   },
   senses: {
-    intro: "DRP Senses vend du mobilier, du carrelage et des matériaux de construction au Luxembourg.",
+    intro: "DRP Senses vend du mobilier et des matériaux de construction au Luxembourg, réalise vos carrelages et se charge aussi de travaux de construction sur demande.",
     s1_t: "Mobilier",
     s2_t: "Carrelage",
     s3_t: "Matériaux de construction",
+    s4_t: "Construction sur demande",
     words: "Carrelage · Mobilier · Matériaux de construction",
-    words2: "Mobilier · Matériaux de construction · Carrelage"
+    words2: "Mobilier · Construction · Matériaux · Carrelage"
   },
   arch: {
     film_label: "DRP Architecture – film",

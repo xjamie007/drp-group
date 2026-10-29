@@ -723,11 +723,12 @@
     show(0);
   }
 
-  /* DRP Senses: Einleitung, drei Boxen (Möbel, Fliesen, Baustoffe) (wie „Unsere Unternehmen“), Wortband, das beim Scrollen gleitet */
+  /* DRP Senses: Einleitung, vier Boxen (Möbel, Fliesen, Baustoffe, Bauarbeiten auf Anfrage) (wie „Unsere Unternehmen“), Wortband, das beim Scrollen gleitet */
   var SENSES_ICON = [
     VENTURE_ICON.senses,
     ventureSvg(["M10 10 H54 V54 H10 Z", "M10 32 H54", "M32 10 V54"]),
-    ventureSvg(["M32 8 L54 20 V44 L32 56 L10 44 V20 Z", "M10 20 L32 32 L54 20", "M32 32 V56", "M21 14 L43 26 V34"])
+    ventureSvg(["M32 8 L54 20 V44 L32 56 L10 44 V20 Z", "M10 20 L32 32 L54 20", "M32 32 V56", "M21 14 L43 26 V34"]),
+    ventureSvg(["M8 30 L32 10 L56 30", "M15 25 V54 H49 V25", "M27 54 V40 H37 V54"])
   ];
   function sensesBody() {
     // zwei Zeilen ohne gemeinsame Wörter → nie dasselbe Wort übereinander; das mittlere Wort der mittleren Kopie steht in der Bildmitte
@@ -739,7 +740,7 @@
       '<div><span class="eyebrow">DRP Senses</span><h2 class="h-section">' + esc(t("bereich.senses.line")) + "</h2></div>" +
       '<p class="lead">' + esc(t("senses.intro")) + "</p></div></div></section>" +
       '<section class="section section--tight" style="padding-top:0"><div class="wrap"><h2 class="visually-hidden">' + esc(t("page.services")) + "</h2>" +
-      '<div class="ventures ventures--3 ventures--static">' + SENSES_ICON.map(function (icon, i) {
+      '<div class="ventures ventures--static">' + SENSES_ICON.map(function (icon, i) {
         var n = i + 1;
         return '<div class="venture">' +
           '<span class="venture__top"><span class="venture__num" aria-hidden="true">0' + n + "</span>" + icon + "</span>" +
@@ -1257,6 +1258,27 @@
 
   pages.team = function (main) {
     main.innerHTML = pageHead(D.site.entetes.team, t("nav.team")) + intro(t("team.lead")) + teamSection() + ctaBand();
+  };
+
+  pages.membre = function (main) {
+    var m = member(param("id"));
+    if (!m || !txt(m.bio).length) { pages.notfound(main); return; }
+    document.title = m.nom + " – DRP Group";
+    main.innerHTML =
+      '<div class="wrap"><nav class="breadcrumb" aria-label="Breadcrumb" style="padding-top:clamp(32px,5vw,64px)"><a href="index.html">DRP Group</a> / <a href="team.html">' + esc(t("nav.team")) + "</a></nav>" +
+      '<div class="split split--top" style="padding:clamp(16px,3vw,40px) 0 clamp(64px,10vw,140px)">' +
+      '<div style="max-width:440px">' + img(m.photo_profil || m.photo, m.nom, "r-2x3", true) + "</div>" +
+      '<div><span class="eyebrow">' + esc(m.role) + '</span><h1 class="h-display">' + esc(m.nom) + '</h1><div class="prose" style="margin-top:32px">' + prose(txt(m.bio)) + "</div>" +
+      '<div class="btn-row" style="margin-top:32px"><a class="btn" href="contact.html">' + esc(t("cta.secondary")) + '</a><a class="btn btn--ghost" href="team.html">' + esc(t("team.back")) + "</a></div></div></div></div>" +
+      ctaBand();
+  };
+
+  pages.notfound = function (main) {
+    document.title = t("meta.notfound");
+    main.innerHTML =
+      '<div class="wrap wrap--narrow" style="padding:clamp(80px,14vw,180px) var(--gutter)"><span class="eyebrow">404</span><h1 class="h-display">' + esc(t("notfound.title")) + "</h1>" +
+      '<p class="lead" style="margin-top:24px">' + esc(t("notfound.text")) + "</p>" +
+      '<div class="btn-row" style="margin-top:32px"><a class="btn" href="index.html">' + esc(t("notfound.home")) + '</a><a class="btn btn--ghost" href="biens.html">' + esc(t("nav.properties")) + '</a><a class="btn btn--ghost" href="contact.html">' + esc(t("nav.contact")) + "</a></div></div>";
   };
 
   // Seitenanfang ohne Foto, nur der Titel (wie beim Datenschutz)

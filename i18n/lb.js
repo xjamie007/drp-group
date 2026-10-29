@@ -105,7 +105,7 @@
   bereich: {
     luxembourg: { line: "Immobilienagence: Kaf, Verkaf, Locatioun, Estimatioun" },
     "real-estate": { line: "Promotioun: Renovatioun, Ëmbau, Neibau" },
-    senses: { line: "Miwwel, Plättercher, Baumaterial" },
+    senses: { line: "Miwwel, Carrelage, Baumaterial" },
     architecture: { line: "Architektur" }
   },
   status: {
@@ -197,12 +197,13 @@
     ba_label: "Vergläich virdrun / duerno"
   },
   senses: {
-    intro: "DRP Senses verkeeft Miwwel, Plättercher a Baumaterial zu Lëtzebuerg.",
+    intro: "DRP Senses verkeeft Miwwel a Baumaterial zu Lëtzebuerg, mécht Carrelage an iwwerhëlt op Ufro och Bauaarbechten.",
     s1_t: "Miwwel",
-    s2_t: "Plättercher",
+    s2_t: "Carrelage",
     s3_t: "Baumaterial",
-    words: "Plättercher · Miwwel · Baumaterial",
-    words2: "Miwwel · Baumaterial · Plättercher"
+    s4_t: "Bauaarbechten op Ufro",
+    words: "Carrelage · Miwwel · Baumaterial",
+    words2: "Miwwel · Bauaarbechten · Baumaterial · Carrelage"
   },
   arch: {
     film_label: "DRP Architecture – Film",
