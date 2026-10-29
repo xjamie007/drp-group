@@ -1257,7 +1257,7 @@
   }
 
   pages.team = function (main) {
-    main.innerHTML = pageHead(D.site.entetes.team, t("nav.team")) + intro(t("team.lead")) + teamSection() + ctaBand();
+    main.innerHTML = titleHead(t("nav.team"), t("team.lead")) + teamSection() + ctaBand(); // ohne Foto, wie Über uns/Kontakt
   };
 
   pages.membre = function (main) {

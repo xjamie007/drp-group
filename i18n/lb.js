@@ -105,7 +105,7 @@
   bereich: {
     luxembourg: { line: "Immobilienagence: Kaf, Verkaf, Locatioun, Estimatioun" },
     "real-estate": { line: "Promotioun: Renovatioun, Ëmbau, Neibau" },
-    senses: { line: "Miwwel, Carrelage, Baumaterial" },
+    senses: { line: "Miwwelen, Carrelage, Baumaterial" },
     architecture: { line: "Architektur" }
   },
   status: {
@@ -197,13 +197,13 @@
     ba_label: "Vergläich virdrun / duerno"
   },
   senses: {
-    intro: "DRP Senses verkeeft Miwwel a Baumaterial zu Lëtzebuerg, mécht Carrelage an iwwerhëlt op Ufro och Bauaarbechten.",
-    s1_t: "Miwwel",
+    intro: "DRP Senses verkeeft Miwwelen a Baumaterial zu Lëtzebuerg, mécht Carrelage an iwwerhëlt op Ufro och Bauaarbechten.",
+    s1_t: "Miwwelen",
     s2_t: "Carrelage",
     s3_t: "Baumaterial",
     s4_t: "Bauaarbechten op Ufro",
-    words: "Carrelage · Miwwel · Baumaterial",
-    words2: "Miwwel · Bauaarbechten · Baumaterial · Carrelage"
+    words: "Carrelage · Miwwelen · Baumaterial",
+    words2: "Miwwelen · Bauaarbechten · Baumaterial · Carrelage"
   },
   arch: {
     film_label: "DRP Architecture – Film",
@@ -276,7 +276,7 @@
   sust: {
     value_quote: "De Präis ass dat, wat Dir bezuelt. De Wäert ass dat, wat Dir kritt.",
     value_p1: "DRP Group steet fir eng harmonesch Entwécklung an e gudde Service fir seng Clienten a Fournisseuren. Domat engagéiert sech DRP Group fir eng nohalteg Zukunft.",
-    value_p2: "Eis Green Challenge ëmfaasst eis wichtegst Visioun: Projeten un hiren Ëmfeld unzepassen. Mat Beem a Planzen dobannen an dobaussen wëll de Grupp Natur a Gebautes mateneen verbannen an esou harmonesch Säulen fir d’Zukunft vun der Entwécklung schafen.",
+    value_p2: "Eis Green Challenge ëmfaasst eis wichtegst Visioun: Projeten un hiren Ëmfeld unzepassen. Mat Beem a Planzen dobannen an dobaussen wëll de Grupp Natur a Gebautes mateneen verbannen an esou harmonesch Sailen fir d’Zukunft vun der Entwécklung schafen.",
     seed_alt: "Eng Hand leet e Some an d’Äerd, doraus wiisst e klenge Sprëtz.",
     title: "Nohaltegkeet",
     lead: "„Eis Visioun baséiert op zwee Piliere: nohalteg Projeten an zefridde Clienten.“",
