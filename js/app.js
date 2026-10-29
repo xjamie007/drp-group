@@ -1265,7 +1265,7 @@
     var L = (window.DRP_LEGAL || {}).privacy || {};
     // ohne Kopfbild, Text über die ganze Breite
     main.innerHTML = titleHead(t("footer.privacy")) + '<div class="wrap legal">' +
-      (lang !== "en" ? '<p class="legal__note" lang="' + lang + '">' + esc(t("legal.only_en")) + "</p>" : "") +
+
       '<div class="prose" lang="en">' + (L.en || "") + "</div></div>" +
       '<div style="height:clamp(64px,10vw,140px)"></div>';
   };
