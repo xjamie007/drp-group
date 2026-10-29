@@ -342,7 +342,7 @@
     type_other: "Anerer",
     commune: "Uertschaft",
     surface: "Wunnfläch (m²)",
-    rooms: "Schlofzëmmer",
+    rooms: "Zëmmer",
     name: "Numm",
     phone: "Telefon",
     email: "E-Mail",

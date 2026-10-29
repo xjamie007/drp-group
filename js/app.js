@@ -1304,7 +1304,8 @@
   };
 
   pages.estimation = function (main) {
-    var communes = uniq(D.items.map(function (i) { return i.localite; }));
+    // alle Ortschaften Luxemburgs (js/places.js, OpenStreetMap) als Vorschläge; freie Eingabe bleibt möglich
+    var communes = uniq((window.DRP_PLACES || []).map(function (p) { return p[0].split("|")[0]; }).concat(D.items.map(function (i) { return i.localite; })));
     main.innerHTML =
       pageHead(D.site.entetes.estimation, t("nav.cta")) +
       '<div class="wrap wrap--narrow"><div class="page-intro"><p class="lead">' + esc(t("form.lead")) + "</p></div>" +
@@ -1332,7 +1333,7 @@
       control.replace(/^(<\w+)/, '$1 aria-describedby="e-' + name + '"') + '<span class="err" id="e-' + name + '"></span></div>';
   }
   function privacyField() {
-    var link = '<a href="' + D.site.confidentialite + '" target="_blank" rel="noopener">' + esc(t("form.privacy_link")) + "</a>";
+    var link = '<a href="datenschutz.html" target="_blank">' + esc(t("form.privacy_link")) + "</a>";
     return '<div class="field"><div class="check"><input type="checkbox" id="f-privacy" name="privacy" required aria-describedby="e-privacy">' +
       '<label for="f-privacy" style="text-transform:none;letter-spacing:0;font-size:.9rem;color:var(--ink);font-weight:400">' + esc(t("form.privacy")).replace("{link}", link) + "</label></div>" +
       '<span class="err" id="e-privacy"></span></div>';

@@ -342,7 +342,7 @@
     type_other: "Andere",
     commune: "Ort",
     surface: "Wohnfläche (m²)",
-    rooms: "Schlafzimmer",
+    rooms: "Zimmer",
     name: "Name",
     phone: "Telefon",
     email: "E-Mail",
