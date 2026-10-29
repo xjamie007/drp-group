@@ -692,7 +692,7 @@
       tick();
     }
     // läuft von selbst weiter; Pause per Knopf, beim Drüberfahren/Fokus, außerhalb des Bildschirms; nicht bei „weniger Bewegung“
-    var DELAY = 7000, timer, stopped = REDUCED || !!window.DRP_EDIT, held = false, seen = false;
+    var DELAY = 4000, timer, stopped = REDUCED || !!window.DRP_EDIT, held = false, seen = false;
     var play = $(".fpc__play", box);
     function tick() { clearTimeout(timer); if (!stopped && !held && seen && !document.hidden) timer = setTimeout(function () { show(k + 1, 1); }, DELAY); }
     function setStopped(v) {
