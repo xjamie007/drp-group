@@ -148,7 +148,7 @@
     map_cta: "Kaart opmaachen",
     who_eyebrow: "Wien mir sinn",
     who_title: "DRP Group – wann eng Visioun Realitéit gëtt",
-    who_text: "DRP Group schafft an der Immobilie, als Promoteur an als Immobilienagence. D’Grënner si Lëtzebuerger, an de Fokus bleift um lëtzebuergesche Marché. „Eis Visioun stécht op zwee Piliere: nohalteg Projeten an zefridde Clienten.“",
+    who_text: "DRP Group schafft an den Immobilien, als Promoteur an als Immobilienagence. D’Grënner si Lëtzebuerger, an de Fokus bleift um lëtzebuergesche Marché. „Eis Visioun baséiert op zwee Piliere: nohalteg Projeten an zefridde Clienten.“",
     who_cta: "Iwwer DRP Group"
   },
   cta: {
@@ -281,7 +281,7 @@
     value_p2: "Eis Green Challenge ëmfaasst eis wichtegst Visioun: Projeten un hiren Ëmfeld unzepassen. Mat Beem a Planzen dobannen an dobaussen wëll de Grupp Natur a Gebautes mateneen verbannen an esou harmonesch Säulen fir d’Zukunft vun der Entwécklung schafen.",
     seed_alt: "Eng Hand leet e Some an d’Äerd, doraus wiisst e klenge Sprëtz.",
     title: "Nohaltegkeet",
-    lead: "„Eis Visioun stécht op zwee Piliere: nohalteg Projeten an zefridde Clienten.“",
+    lead: "„Eis Visioun baséiert op zwee Piliere: nohalteg Projeten an zefridde Clienten.“",
     vision: "Nohaltegkeet bleift eng Prioritéit. Mir entwéckelen ëmweltfrëndlech Wunn- a Geschäftsgebaier, déi fir Qualitéit a Komfort stinn. DRP Group steet fir eng harmonesch Entwécklung a gudde Service fir Clienten a Fournisseuren, an engagéiert sech fir eng nohalteg Zukunft.",
     gc_eyebrow: "Green Challenge",
     gc_title: "En Doheem kaf, e Bam geplanzt",

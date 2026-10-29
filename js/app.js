@@ -1228,7 +1228,7 @@
   pages.about = function (main) {
     var p = function (id, n) { return (byId(id) || { images: [] }).images[n || 0]; };
     // Über uns: Kopf wie alte About-Seite, dann das Team, darunter der Rest der Seite
-    main.innerHTML = titleHead(t("nav.about"), t("about.h1")) + teamSection() +
+    main.innerHTML = titleHead(t("nav.about")) + teamSection() +
       '<section class="section section--off"><div class="wrap"><div class="split">' + img(p("residences-blanchy-rene-bascharage", 1), "", "r-4x5") +
       '<div><p class="lead">' + esc(t("about.p1")) + "</p></div></div></div></section>" +
       '<section class="section"><div class="wrap"><div class="split"><div><h2 class="h-section">' + esc(t("about.h2")) + '</h2><p class="lead" style="margin-top:24px">' + esc(t("sust.vision")) + "</p>" +
