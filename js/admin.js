@@ -669,6 +669,7 @@
     if (A.page === 'membre' && id) {
       C.data.team.forEach(function (m, i) { if (m.id === id) chip($('#main h1') && $('#main h1').parentElement, '✎ Angaben zu dieser Person', function () { teamSheet(i); }); });
     }
+    if (A.page === 'home') chip($('.fpc-section'), '★ „Im Fokus“ auswählen', focusSheet, 'kx-chip-mid');
     var wall = $('.arch-wall');
     if (wall) chip(wall.parentElement, '🖼 Bilder verwalten (' + C.data.architecture.photos.length + ')', function () { galleryManager('architecture.photos', 'DRP Architecture'); }, 'kx-chip-top');
   }
@@ -739,7 +740,7 @@
   function loadPlaces() {
     if (window.DRP_PLACES) return Promise.resolve(window.DRP_PLACES);
     return placesP || (placesP = new Promise(function (res) {
-      var sc = document.createElement('script'); sc.src = 'js/places.js?v=20261029h'; sc.onload = function () { res(window.DRP_PLACES || []); }; sc.onerror = function () { res([]); };
+      var sc = document.createElement('script'); sc.src = 'js/places.js?v=20261029i'; sc.onload = function () { res(window.DRP_PLACES || []); }; sc.onerror = function () { res([]); };
       document.head.appendChild(sc);
     }));
   }
@@ -851,6 +852,31 @@
       closeSheet(); toast('Firmendaten übernommen – bitte Speichern nicht vergessen');
     };
   }
+  /* „Im Fokus“ auf der Startseite: 1 bis 3 Projekte/Immobilien ankreuzen (Reihenfolge wie in der Liste) */
+  function focusSheet() {
+    var box = function (type, title) {
+      return '<h3 class="kx-h3">' + title + '</h3>' + C.data.items.filter(function (x) { return x.type === type; }).map(function (x) {
+        return '<label class="kx-check"><input type="checkbox" name="f" value="' + esc(x.id) + '"' + (x.a_laffiche ? ' checked' : '') + '> ' + esc(x.titre) + '</label>';
+      }).join('');
+    };
+    var w = sheet('„Im Fokus“ auswählen', '<form class="kx-form"><p class="kx-hint">Bis zu 3 ankreuzen. Sie erscheinen auf der Startseite im Wechsel. <span data-n></span></p>' +
+      box('projet', 'Projekte') + box('bien', 'Immobilien') +
+      '<button class="kx-btn kx-primary kx-block" type="submit">Übernehmen</button></form>', { noFocus: true });
+    var boxes = $$('input[name=f]', w);
+    var sync = function () {
+      var n = boxes.filter(function (b) { return b.checked; }).length;
+      boxes.forEach(function (b) { b.disabled = !b.checked && n >= 3; });
+      $('[data-n]', w).textContent = n + ' von 3 ausgewählt.';
+    };
+    boxes.forEach(function (b) { b.onchange = sync; }); sync();
+    $('form', w).onsubmit = function (e) {
+      e.preventDefault();
+      var on = boxes.filter(function (b) { return b.checked; }).map(function (b) { return b.value; });
+      if (!on.length) { toast('Bitte mindestens ein Objekt ankreuzen.'); return; }
+      change(function () { C.data.items.forEach(function (x) { x.a_laffiche = on.indexOf(x.id) > -1; }); });
+      closeSheet(); toast('„Im Fokus“ übernommen – bitte Speichern nicht vergessen');
+    };
+  }
   /* Vorher/Nachher (DRP Real Estate): erscheint, sobald beide Fotos da sind */
   function baSheet() {
     C.data.avant_apres = C.data.avant_apres && C.data.avant_apres.length ? C.data.avant_apres : [{ titre: null, avant: null, apres: null, projet: null }];
@@ -909,6 +935,7 @@
     };
     var items = function (type) { return C.data.items.filter(function (x) { return x.type === type; }).map(function (x) { return li(A.url(x), x.titre, 'data-di="' + esc(x.id) + '"'); }).join(''); };
     var html = '<h3 class="kx-h3">Seiten</h3><div class="kx-list">' + PAGES.map(function (p) { return li(p[0], p[1], LOCKED.indexOf(p[0]) < 0 ? 'data-dp="' + p[0] + '"' : ''); }).join('') + '</div>' +
+      '<button class="kx-btn kx-ghost kx-block" data-focus style="margin:12px 0">★ „Im Fokus“ auf der Startseite auswählen</button>' +
       '<h3 class="kx-h3">Projekte</h3><div class="kx-list">' + items('projet') + '</div>' +
       '<h3 class="kx-h3">Immobilien</h3><div class="kx-list">' + items('bien') + '</div>' +
       '<div class="kx-row" style="margin-top:12px"><button class="kx-btn kx-ghost" data-n="bien">+ Neue Immobilie</button><button class="kx-btn kx-ghost" data-n="projet">+ Neues Projekt</button></div>' +
@@ -918,6 +945,7 @@
     $$('[data-n]', w).forEach(function (b) { b.onclick = function () { newItemSheet(b.getAttribute('data-n')); }; });
     $$('[data-dp]', w).forEach(function (b) { b.onclick = function () { togglePage(b.getAttribute('data-dp')); }; });
     $('[data-trash]', w).onclick = trashSheet;
+    $('[data-focus]', w).onclick = focusSheet;
     $$('[data-di]', w).forEach(function (b) {
       b.onclick = function () {
         var id = b.getAttribute('data-di'), here = A.param('id') === id, it = C.data.items.filter(function (x) { return x.id === id; })[0];

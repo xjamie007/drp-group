@@ -37,6 +37,7 @@ html.kx-on .kx-num{cursor:pointer;outline:2px dashed rgba(24,99,220,.5);outline-
 .kx-chip:hover{background:#15202b}
 .kx-chip-gal{top:auto;bottom:10px;left:50%;transform:translateX(-50%)}
 .kx-chip-top{top:-56px;left:auto;right:0}
+.kx-chip-mid{left:50%;transform:translateX(-50%)}
 .kx-add{display:block;width:100%;min-height:56px;margin:18px 0 0;border:2px dashed #1863dc;border-radius:12px;background:rgba(24,99,220,.06);color:#1863dc!important;font-size:17px!important;font-weight:600;cursor:pointer}
 .kx-sheet-wrap{position:fixed;inset:0;z-index:2147483001;background:rgba(10,16,24,.5);display:flex;align-items:flex-end;justify-content:center}
 .kx-sheet{width:100%;max-width:560px;max-height:92vh;overflow:auto;background:#fff;color:#15202b;border-radius:18px 18px 0 0;box-shadow:0 -8px 30px rgba(0,0,0,.3);padding-bottom:env(safe-area-inset-bottom)}
@@ -55,6 +56,7 @@ html.kx-on .kx-num{cursor:pointer;outline:2px dashed rgba(24,99,220,.5);outline-
 .kx-form input:focus,.kx-form textarea:focus,.kx-form select:focus{border-color:#1863dc;outline:3px solid rgba(24,99,220,.2)}
 .kx-check{flex-direction:row!important;align-items:center;gap:10px!important;font-weight:400!important}
 .kx-check input{width:24px;height:24px}
+.kx-check:has(input:disabled){opacity:.45}
 .kx-cats{border:1.5px solid #e2e7ee;border-radius:10px;padding:10px 14px;display:flex;flex-direction:column;gap:8px}
 .kx-cats legend{font-weight:600;padding:0 6px}
 .kx-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:0 20px;border:0;border-radius:12px;font-size:17px!important;font-weight:600;cursor:pointer;text-align:center}
