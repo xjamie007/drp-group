@@ -24,6 +24,7 @@
     return key.split(".").reduce(function (o, k) { return o && o[k] !== undefined ? o[k] : undefined; }, dict);
   }
   function t(key, vars) {
+    if (window.DRP_EDIT) (window.DRP_USED = window.DRP_USED || {})[key] = 1; // Admin: „Alle Texte dieser Seite“
     var s = lookup(I[lang], key);
     if (s === undefined) s = lookup(I.en, key);
     if (s === undefined) return key;
@@ -1414,6 +1415,7 @@
   /* ------------------------------------------------------------ render */
   function render() {
     D = window.DRP_DATA; I = window.DRP_I18N;
+    if (window.DRP_EDIT) window.DRP_USED = {};
     cleanups.forEach(function (fn) { try { fn(); } catch (e) { /* ignore */ } });
     cleanups = [];
     document.documentElement.lang = lang;

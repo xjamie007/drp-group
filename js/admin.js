@@ -26,7 +26,7 @@
   function strip(s) { return String(s).replace(STRIP, ''); }
   function fresh() {
     var c = window.DRP_CONTENT ? clone(window.DRP_CONTENT) : {};
-    return { version: 1, dataSig: ST.dataSig, data: c.data || clone(ST.original.data), i18n: c.i18n || {}, seo: c.seo || {}, alts: c.alts || {}, trash: c.trash || [] };
+    return { version: 1, dataSig: ST.dataSig, data: c.data || clone(ST.original.data), i18n: c.i18n || {}, seo: c.seo || {}, alts: c.alts || {}, trash: c.trash || [], legal: c.legal || null };
   }
 
   /* Seite, für die Titel/Beschreibung gelten (z. B. „bien:apartment-01…“) */
@@ -164,12 +164,13 @@
       '<button class="kx-b kx-save" data-a="save" disabled><span class="kx-i">✓</span><span>Speichern</span></button>' +
       '<button class="kx-b" data-a="undo" disabled><span class="kx-i">↶</span><span>Rückgängig</span></button>' +
       '<button class="kx-b" data-a="pages"><span class="kx-i">☰</span><span>Seiten</span></button>' +
+      '<button class="kx-b" data-a="texts"><span class="kx-i">Aa</span><span>Texte</span></button>' +
       '<button class="kx-b" data-a="seo"><span class="kx-i">G</span><span>Google</span></button>' +
       '<button class="kx-b" data-a="more"><span class="kx-i">⋯</span><span>Mehr</span></button>';
     document.body.appendChild(bar);
     bar.addEventListener('click', function (e) {
       var b = e.target.closest('button'); if (!b) return;
-      ({ save: save, undo: doUndo, pages: pagesSheet, seo: seoSheet, more: moreSheet })[b.getAttribute('data-a')]();
+      ({ save: save, undo: doUndo, pages: pagesSheet, texts: textsSheet, seo: seoSheet, more: moreSheet })[b.getAttribute('data-a')]();
     });
     ctxBar = document.createElement('div');
     ctxBar.className = 'kx-ctx'; ctxBar.hidden = true;
@@ -314,7 +315,12 @@
     if (e.target.closest('.kx-bar, .kx-ctx, .kx-sheet-wrap, .kx-toast, .kx-chip, .k-login, .lang-menu, [data-lang]')) return;
     var a = e.target.closest('a[href]');
     if (a) e.preventDefault();
-    if (e.target.closest('.kx-text')) { select(e.target); return; }
+    var phEl = e.target.closest('.ph'); // Platzhalter ohne Foto: Foto hinzufügen (vor der Textbearbeitung: „Foto folgt“ ist auch ein Text)
+    if (phEl && addPhoto(phEl)) { e.preventDefault(); e.stopPropagation(); return; }
+    if (e.target.closest('.kx-text, .kx-rich')) {
+      if (e.target.closest('label')) e.preventDefault(); // sonst springt der Klick ins zugehörige Eingabefeld
+      select(e.target); return;
+    }
     if (e.target.closest('.hero') && !e.target.closest('.hero__scroll')) { e.preventDefault(); heroSheet(); return; } // Startseite oben: Foto oder Video (Verlauf liegt darüber)
     var vid = e.target.closest('.arch-film-v, #g-main video, video');
     if (vid) { var spec = videoSpec(vid); if (spec) { e.preventDefault(); e.stopPropagation(); videoSheet(spec); return; } }
@@ -575,6 +581,26 @@
     if (del) del.onclick = function () { closeSheet(); change(function () { setP(C.data, spec.mp4, null); if (spec.webm) setP(C.data, spec.webm, null); }); toast('Video entfernt'); };
   }
 
+  /* Foto dort hinzufügen, wo noch ein Platzhalter steht (neue Person, neues Objekt) */
+  function addPhoto(phEl) {
+    var b = blockOf(phEl);
+    if (b && b.list === 'team') { photoSheet('team.' + b.i + '.photo', C.data.team[b.i].nom); return true; }
+    var i = b && b.list === 'items' ? b.i : (phEl.closest('.gallery') ? itemIdx() : -1);
+    if (i > -1) { galleryManager('items.' + i + '.images', C.data.items[i].titre); return true; }
+    if (A.page === 'membre') { var id = A.param('id'), k = -1; C.data.team.forEach(function (m, x) { if (m.id === id) k = x; }); if (k > -1) { photoSheet('team.' + k + '.photo', C.data.team[k].nom); return true; } }
+    return false;
+  }
+  function photoSheet(path, title) {
+    var w = sheet('Foto hinzufügen', '<div class="kx-form"><p class="kx-hint">Für „' + esc(strip(title || '')) + '“ ist noch kein Foto da.</p>' + pickers(false) + '</div>', { noFocus: true });
+    $$('input[type=file]', w).forEach(function (inp) {
+      inp.onchange = function () {
+        var f = inp.files[0]; if (!f) return; working(true);
+        upload(f, title || 'foto', { maxW: 1200 }).then(function (r) { working(false); closeSheet(); change(function () { setP(C.data, path, r.path); }); toast('Foto hinzugefügt'); })
+          .catch(function () { working(false); toast('Das Bild konnte nicht geladen werden.', 5000); });
+      };
+    });
+  }
+
   /* ------------------------------------------------------------ Bilder verwalten (Galerie eines Objekts, Fotowand) */
   function galleryManager(listPath, title) {
     var w = sheet('Bilder verwalten', '<div></div>', { wide: true, noFocus: true });
@@ -630,6 +656,7 @@
   }
   function chips() {
     var id = A.param('id');
+    if (A.page === 'datenschutz') legalEditable();
     if ((A.page === 'bien' || A.page === 'projet') && id) {
       var i = itemIndexByHref('?id=' + encodeURIComponent(id));
       if (i > -1) {
@@ -648,6 +675,7 @@
 
   /* ------------------------------------------------------------ Angaben zu Objekt / Person */
   var STATUS = ['a-vendre', 'a-louer', 'vendu', 'loue', 'en-cours', 'realise'];
+  var CATS = ['appartement', 'maison', 'penthouse', 'residence', 'maisons'];
   function field(label, name, val, type, hint) {
     return '<label>' + label + (hint ? ' <small>' + hint + '</small>' : '') + (type === 'area'
       ? '<textarea name="' + name + '" rows="6">' + esc(val == null ? '' : val) + '</textarea>'
@@ -660,23 +688,43 @@
       '<label>Ort<input name="localite" list="kx-places" autocomplete="off" value="' + esc(it.localite || '') + '"></label><datalist id="kx-places"></datalist>' +
       field('Gemeinde', 'gemeinde', it.gemeinde) +
       '<label>Stand<select name="statut">' + STATUS.map(function (s) { return '<option value="' + s + '"' + (s === it.statut ? ' selected' : '') + '>' + esc(strip(A.t('status.' + s))) + '</option>'; }).join('') + '</select></label>' +
-      (it.type === 'bien' ? field('Preis in €', 'prix', it.prix, 'num', 'leer = „Preis auf Anfrage“') + field('Wohnfläche in m²', 'surface', it.surface, 'num') : field('Anzahl Einheiten', 'unites_total', it.unites_total, 'num')) +
+      '<label>Art<select name="categorie">' + CATS.map(function (c) { return '<option value="' + c + '"' + (c === it.categorie ? ' selected' : '') + '>' + esc(strip(A.t('cat.' + c))) + '</option>'; }).join('') + '</select></label>' +
+      '<label>Unternehmen<select name="bereich">' + [['luxembourg', 'DRP Luxembourg (Agentur)'], ['real-estate', 'DRP Real Estate (eigene Projekte)']].map(function (b) { return '<option value="' + b[0] + '"' + (b[0] === it.bereich ? ' selected' : '') + '>' + b[1] + '</option>'; }).join('') + '</select></label>' +
+      (it.type === 'bien' ? field('Preis in €', 'prix', it.prix, 'num', 'leer = „Preis auf Anfrage“; bei „Zu vermieten“ die Monatsmiete') +
+        '<label class="kx-check"><input type="checkbox" name="tva3"' + (it.prix_tva3 ? ' checked' : '') + '> Preis inkl. 3 % MwSt.</label>' +
+        field('Wohnfläche in m²', 'surface', it.surface, 'num') +
+        '<label>Gehört zu Projekt<select name="projet"><option value="">– kein Projekt –</option>' + C.data.items.filter(function (x) { return x.type === 'projet'; }).map(function (x) { return '<option value="' + esc(x.id) + '"' + (x.id === it.projet ? ' selected' : '') + '>' + esc(strip(x.titre)) + '</option>'; }).join('') + '</select></label>'
+        : field('Anzahl Einheiten', 'unites_total', it.unites_total, 'num') + field('Verkauft (z. B. 5/6)', 'vente', it.vente) +
+          field('Flächen als Spanne (z. B. 90–150)', 'surface_texte', it.surface_texte) +
+          field('Einheiten (eine pro Zeile)', 'unites', (it.unites || []).join('\n'), 'area')) +
       field('Schlafzimmer', 'chambres', it.chambres, '', 'z. B. 3 oder 2–3') +
+      '<label>Verfügbar<select name="dispo"><option value="now"' + (it.disponibilite === 'now' ? ' selected' : '') + '>Sofort</option><option value="tbd"' + (!it.disponibilite || it.disponibilite === 'tbd' ? ' selected' : '') + '>Wird bestätigt</option>' +
+        '<option value="date"' + (it.disponibilite && it.disponibilite !== 'now' && it.disponibilite !== 'tbd' ? ' selected' : '') + '>Ab Datum / Zeitraum …</option></select></label>' +
+      field('Datum oder Zeitraum', 'dispo_date', it.disponibilite && it.disponibilite !== 'now' && it.disponibilite !== 'tbd' ? it.disponibilite : '', '', 'z. B. 01.12.2026, 2027 oder Q1 2027') +
+      field('Baujahr', 'annee', it.annee, '', 'z. B. 2012 oder Q1 2026') + field('Energieklasse', 'energie', it.energie, '', 'z. B. B / B') +
+      field('Adresse', 'adresse', it.adresse, '', 'leer lassen, wenn sie nicht genannt werden soll') +
+      field('Broschüre (Link zur PDF)', 'brochure', it.brochure) +
       field('Beschreibung (' + l.toUpperCase() + ')', 'desc', (desc[l] || desc.en || []).join ? (desc[l] || desc.en || []).join('\n\n') : (desc[l] || ''), 'area', 'Leerzeile = neuer Absatz') +
       '<label class="kx-check"><input type="checkbox" name="aff"' + (it.a_laffiche ? ' checked' : '') + '> Auf der Startseite unter „Im Fokus“ zeigen (höchstens 3)</label>' +
       '<div class="kx-mapbox"><span class="kx-lbl2">Position auf der Karte</span><p class="kx-hint" data-pos>Wird beim Eintippen des Ortes automatisch gesetzt (Ortsmitte). Zum Ändern den Punkt verschieben oder in die Karte tippen.</p>' +
       '<div class="kx-map"></div><div class="kx-row kx-latlng">' + field('Breite', 'lat', it.lat, 'num') + field('Länge', 'lng', it.lng, 'num') + '</div></div>' +
       '<button class="kx-btn kx-primary kx-block" type="submit">Übernehmen</button></form>');
     mapPicker(w, it);
+    var dsel = $('[name=dispo]', w), dlab = $('[name=dispo_date]', w).closest('label');
+    var dshow = function () { dlab.hidden = dsel.value !== 'date'; }; dsel.onchange = dshow; dshow();
     $('form', w).onsubmit = function (e) {
       e.preventDefault();
       var f = e.target, n = function (v) { v = String(v).replace(',', '.').trim(); return v === '' ? null : +v; };
       if (f.aff.checked && !it.a_laffiche && C.data.items.filter(function (x) { return x.a_laffiche; }).length >= 3) { toast('„Im Fokus“ zeigt höchstens 3 Objekte. Bitte zuerst bei einem anderen das Häkchen entfernen.', 5000); return; }
       change(function () {
+        var tx = function (v) { v = String(v).trim(); return v || null; };
         it.titre = f.titre.value.trim(); it.localite = f.localite.value.trim(); it.gemeinde = f.gemeinde.value.trim(); it.statut = f.statut.value;
-        if (f.prix) { it.prix = n(f.prix.value); it.surface = n(f.surface.value); }
-        if (f.unites_total) it.unites_total = n(f.unites_total.value);
+        it.categorie = f.categorie.value; it.bereich = f.bereich.value;
+        if (f.prix) { it.prix = n(f.prix.value); it.surface = n(f.surface.value); it.prix_tva3 = f.tva3.checked; it.projet = f.projet.value || null; }
+        if (f.unites_total) { it.unites_total = n(f.unites_total.value); it.vente = tx(f.vente.value); it.surface_texte = tx(f.surface_texte.value); it.unites = f.unites.value.split(/\n+/).map(function (x) { return x.trim(); }).filter(Boolean); }
         it.chambres = f.chambres.value.trim() || null;
+        it.disponibilite = f.dispo.value === 'date' ? tx(f.dispo_date.value) || 'tbd' : f.dispo.value;
+        it.annee = tx(f.annee.value); it.energie = tx(f.energie.value); it.adresse = tx(f.adresse.value); it.brochure = tx(f.brochure.value);
         it.description = it.description || {};
         it.description[l] = f.desc.value.split(/\n\s*\n/).map(function (p) { return p.trim(); }).filter(Boolean);
         it.a_laffiche = f.aff.checked;
@@ -691,7 +739,7 @@
   function loadPlaces() {
     if (window.DRP_PLACES) return Promise.resolve(window.DRP_PLACES);
     return placesP || (placesP = new Promise(function (res) {
-      var sc = document.createElement('script'); sc.src = 'js/places.js?v=20261029b'; sc.onload = function () { res(window.DRP_PLACES || []); }; sc.onerror = function () { res([]); };
+      var sc = document.createElement('script'); sc.src = 'js/places.js?v=20261029c'; sc.onload = function () { res(window.DRP_PLACES || []); }; sc.onerror = function () { res([]); };
       document.head.appendChild(sc);
     }));
   }
@@ -740,17 +788,104 @@
     var w = sheet('Person – Angaben', '<form class="kx-form">' + field('Name', 'nom', m.nom) + field('Funktion', 'role', m.role) +
       '<label>Gruppe<select name="groupe"><option value="associes"' + (m.groupe === 'associes' ? ' selected' : '') + '>Partner (oben)</option><option value="equipe"' + (m.groupe !== 'associes' ? ' selected' : '') + '>Team</option></select></label>' +
       field('E-Mail', 'email', m.email) + field('Telefon', 'tel', m.tel) +
+      field('Link beim Antippen der Person', 'url', m.url, '', '„/team/name/“ = eigene Profilseite, sonst volle Adresse (z. B. https://…)') +
       field('Text auf der Profilseite (' + l.toUpperCase() + ')', 'bio', (bio[l] || bio.en || []).join ? (bio[l] || bio.en || []).join('\n\n') : '', 'area', 'Leerzeile = neuer Absatz') +
       '<button class="kx-btn kx-primary kx-block" type="submit">Übernehmen</button></form>');
     $('form', w).onsubmit = function (e) {
       e.preventDefault(); var f = e.target;
       change(function () {
         m.nom = f.nom.value.trim(); m.role = f.role.value.trim(); m.groupe = f.groupe.value;
-        m.email = f.email.value.trim() || undefined; m.tel = f.tel.value.trim() || undefined;
+        m.email = f.email.value.trim() || undefined; m.tel = f.tel.value.trim() || undefined; m.url = f.url.value.trim() || m.url;
         m.bio = m.bio || {}; m.bio[l] = f.bio.value.split(/\n\s*\n/).map(function (p) { return p.trim(); }).filter(Boolean);
       });
       closeSheet(); toast('Angaben übernommen – bitte Speichern nicht vergessen');
     };
+  }
+
+  /* ------------------------------------------------------------ Alle Texte dieser Seite (auch Knöpfe, Auswahllisten, Platzhalter, Fehlermeldungen) */
+  function rawText(key) {
+    var get = function (d) { return key.split('.').reduce(function (o, k) { return o == null ? undefined : o[k]; }, d); };
+    var v = get(window.DRP_I18N[lang()]); if (v === undefined) v = get(window.DRP_I18N.en);
+    return typeof v === 'string' ? v : null;
+  }
+  function textsSheet() {
+    commitEditing();
+    var keys = Object.keys(window.DRP_USED || {}).filter(function (k) { return rawText(k) !== null; });
+    var w = sheet('Alle Texte dieser Seite (' + lang().toUpperCase() + ')', '<div class="kx-form">' +
+      '<p class="kx-hint">Hier stehen alle Texte dieser Seite, auch Knöpfe, Auswahllisten, Hinweise im leeren Feld und Fehlermeldungen. Sie gelten für die oben gewählte Sprache. Zeichen in geschweiften Klammern wie {n} bitte stehen lassen – dort setzt die Seite eine Zahl oder einen Namen ein.</p>' +
+      '<input class="kx-search" type="search" placeholder="Suchen …" aria-label="Texte durchsuchen">' +
+      '<div class="kx-texts">' + keys.map(function (k, i) {
+        var v = rawText(k), long = v.length > 70;
+        return '<label class="kx-tx" data-k="' + esc(k) + '"><small>' + esc(k) + '</small>' + (long ? '<textarea rows="3" data-i="' + i + '">' + esc(v) + '</textarea>' : '<input data-i="' + i + '" value="' + esc(v) + '">') + '</label>';
+      }).join('') + '</div><button class="kx-btn kx-primary kx-block" data-a="ok">Übernehmen</button></div>', { wide: true, noFocus: true });
+    $('.kx-search', w).oninput = function () {
+      var q = this.value.toLowerCase();
+      $$('.kx-tx', w).forEach(function (l) { l.hidden = q && (l.textContent + ' ' + $('input,textarea', l).value).toLowerCase().indexOf(q) < 0; });
+    };
+    $('[data-a=ok]', w).onclick = function () {
+      var changes = [];
+      $$('[data-i]', w).forEach(function (f) { var k = keys[+f.getAttribute('data-i')]; if (f.value !== rawText(k)) changes.push([k, f.value]); });
+      closeSheet();
+      if (!changes.length) return;
+      change(function () { C.i18n[lang()] = C.i18n[lang()] || {}; changes.forEach(function (x) { C.i18n[lang()][x[0]] = x[1]; }); });
+      toast(changes.length + (changes.length === 1 ? ' Text geändert' : ' Texte geändert') + ' – bitte Speichern nicht vergessen');
+    };
+  }
+  /* Firmendaten: Adresse, Telefon, E-Mail, soziale Netzwerke – erscheinen in Kontakt und Footer */
+  function companySheet() {
+    var s0 = C.data.site;
+    var w = sheet('Firmendaten', '<form class="kx-form"><p class="kx-hint">Diese Angaben stehen im Footer, auf der Kontaktseite und in der mobilen Leiste („Anrufen“).</p>' +
+      field('Firmenname', 'societe', s0.societe) +
+      field('Adresse', 'adresse', (s0.adresse || []).join('\n'), 'area', 'eine Zeile pro Zeile der Anschrift') +
+      field('Zusatz unter der Adresse', 'note', s0.adresse_note) +
+      field('Telefonnummern', 'tel', (s0.telephones || []).map(function (x) { return x.label; }).join('\n'), 'area', 'eine Nummer pro Zeile; die erste wählt der Knopf „Anrufen“') +
+      field('E-Mail', 'email', s0.email) + field('LinkedIn (Adresse)', 'linkedin', s0.linkedin) + field('Instagram (Adresse)', 'instagram', s0.instagram) +
+      '<button class="kx-btn kx-primary kx-block" type="submit">Übernehmen</button></form>');
+    $('form', w).onsubmit = function (e) {
+      e.preventDefault(); var f = e.target, lines = function (v) { return v.split(/\n+/).map(function (x) { return x.trim(); }).filter(Boolean); };
+      change(function () {
+        s0.societe = f.societe.value.trim(); s0.adresse = lines(f.adresse.value); s0.adresse_note = f.note.value.trim() || null;
+        s0.telephones = lines(f.tel.value).map(function (l) { var d = l.replace(/[^\d+]/g, ''); return { label: l, href: 'tel:' + (d.charAt(0) === '+' ? d : '+352' + d) }; });
+        s0.email = f.email.value.trim(); s0.linkedin = f.linkedin.value.trim(); s0.instagram = f.instagram.value.trim();
+      });
+      closeSheet(); toast('Firmendaten übernommen – bitte Speichern nicht vergessen');
+    };
+  }
+  /* Vorher/Nachher (DRP Real Estate): erscheint, sobald beide Fotos da sind */
+  function baSheet() {
+    C.data.avant_apres = C.data.avant_apres && C.data.avant_apres.length ? C.data.avant_apres : [{ titre: null, avant: null, apres: null, projet: null }];
+    var o = C.data.avant_apres[0];
+    var slot = function (k, label) { return '<div class="kx-ba"><span class="kx-lbl2">' + label + '</span><div class="kx-prev">' + (o[k] ? '<img src="' + esc(S.imageUrl(o[k])) + '" alt="">' : '<p class="kx-hint">Noch kein Foto</p>') + '</div>' +
+      '<div class="kx-row kx-pick"><label class="kx-btn kx-primary">📁 Foto aus Galerie<input type="file" accept="image/*" hidden data-k="' + k + '"></label><label class="kx-btn kx-primary">📷 Foto aufnehmen<input type="file" accept="image/*" capture="environment" hidden data-k="' + k + '"></label></div>' +
+      (o[k] ? '<button class="kx-btn kx-ghost kx-red" data-del="' + k + '">Foto entfernen</button>' : '') + '</div>'; };
+    var w = sheet('Vorher / Nachher', '<div class="kx-form"><p class="kx-hint">Zwei Fotos derselben Stelle – vor und nach der Renovierung. Der Regler erscheint auf „DRP Real Estate“, sobald beide Fotos da sind.</p>' +
+      slot('avant', 'Vorher') + slot('apres', 'Nachher') + '<button class="kx-btn kx-primary kx-block" data-a="ok">Fertig</button></div>', { noFocus: true });
+    $$('input[type=file]', w).forEach(function (inp) {
+      inp.onchange = function () {
+        var f = inp.files[0], k = inp.getAttribute('data-k'); if (!f) return; working(true);
+        upload(f, 'vorher-nachher-' + k, { maxW: 1600 }).then(function (r) { working(false); change(function () { o[k] = r.path; }); baSheet(); })
+          .catch(function () { working(false); toast('Das Bild konnte nicht geladen werden.', 5000); });
+      };
+    });
+    $$('[data-del]', w).forEach(function (b) { b.onclick = function () { change(function () { o[b.getAttribute('data-del')] = null; }); baSheet(); }; });
+    $('[data-a=ok]', w).onclick = closeSheet;
+  }
+  /* Datenschutztext direkt auf der Seite bearbeiten (Überschriften, Absätze, Listen, Links bleiben erhalten) */
+  function legalEditable() {
+    var el = $('.legal .prose'); if (!el || el.isContentEditable) return;
+    el.contentEditable = 'true'; el.classList.add('kx-rich');
+    el.addEventListener('focus', function () { el._before = el.innerHTML; });
+    el.addEventListener('blur', function () {
+      if (el.innerHTML === el._before) return;
+      var box = document.createElement('div'); box.innerHTML = el.innerHTML;
+      $$('*', box).forEach(function (n) {
+        if (!/^(H2|H3|P|UL|OL|LI|STRONG|EM|BR|A)$/.test(n.tagName)) { n.replaceWith.apply(n, Array.prototype.slice.call(n.childNodes)); return; }
+        Array.prototype.slice.call(n.attributes).forEach(function (at) { if (!(n.tagName === 'A' && at.name === 'href')) n.removeAttribute(at.name); });
+      });
+      var html = box.innerHTML;
+      change(function () { C.legal = html; }, false);
+      el._before = el.innerHTML;
+    });
   }
 
   /* ------------------------------------------------------------ Seiten, Google, Mehr */
@@ -901,6 +1036,9 @@
       '<button class="kx-li" data-m="newb">➕ Neue Immobilie</button>' +
       '<button class="kx-li" data-m="newp">➕ Neues Projekt</button>' +
       '<button class="kx-li" data-m="newt">➕ Neue Person im Team</button>' +
+      '<button class="kx-li" data-m="texts">Aa Alle Texte dieser Seite</button>' +
+      '<button class="kx-li" data-m="company">🏢 Firmendaten (Adresse, Telefon, E-Mail, soziale Netzwerke)</button>' +
+      (A.page === 'bereich' && document.body.dataset.bereich === 'real-estate' ? '<button class="kx-li" data-m="ba">⇆ Vorher/Nachher-Fotos</button>' : '') +
       '<button class="kx-li" data-m="trash">🗑 Papierkorb – Gelöschtes wiederherstellen (' + trashCount() + ')</button>' +
       '<button class="kx-li" data-m="help">❓ Kurzanleitung</button>' +
       (isItem ? '<button class="kx-li" data-m="resetp">↺ Dieses Objekt auf Original zurücksetzen</button><button class="kx-li kx-red" data-m="delitem">🗑 Dieses Objekt löschen</button>' : '') +
@@ -916,6 +1054,9 @@
         if (a === 'newt') newTeamSheet();
         if (a === 'help') helpSheet();
         if (a === 'trash') trashSheet();
+        if (a === 'texts') textsSheet();
+        if (a === 'company') companySheet();
+        if (a === 'ba') baSheet();
         if (a === 'resetp') resetItem(id);
         if (a === 'delitem') { var tp = A.page === 'projet' ? 'projets.html' : 'biens.html'; deleteItem(id, function () { location.href = tp; }); }
         if (a === 'delpage') togglePage(file);
@@ -935,6 +1076,8 @@
       '<li><b>Löschen:</b> Seiten, Projekte und Immobilien unter „Seiten“ (🗑) oder auf der Seite selbst unter „Mehr“. Alles Gelöschte liegt im <b>Papierkorb</b> (unter „Mehr“ und unten in „Seiten“) und lässt sich dort wiederherstellen.</li>' +
       '<li><b>Google:</b> Titel, Beschreibung und Bildbeschreibungen pro Seite und Sprache.</li>' +
       '<li><b>Andere Seite bearbeiten:</b> „Seiten“.</li>' +
+      '<li><b>Texte, die man nicht antippen kann</b> (Knöpfe, Auswahllisten, Hinweise im leeren Feld, Fehlermeldungen): „Texte“ in der Leiste unten.</li>' +
+      '<li><b>Adresse, Telefon, E-Mail:</b> „Mehr → Firmendaten“.</li>' +
       '<li><b>Fertig?</b> Auf <b>Speichern</b> tippen. Vertippt? <b>Rückgängig</b>.</li></ol>', { noFocus: true });
   }
   function newItemSheet(type) {

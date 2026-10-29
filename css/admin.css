@@ -113,4 +113,11 @@ html.kx-on .rv{opacity:1!important;translate:none!important}
 .kx-trow>div{flex:1 1 200px;display:flex;flex-direction:column;gap:2px}
 .kx-trow small{color:#6b7785;font-size:13px!important}
 .kx-trow .kx-btn{min-height:48px;flex:0 0 auto}
+.kx-texts{display:flex;flex-direction:column;gap:10px;max-height:58vh;overflow:auto;padding-right:4px}
+.kx-tx small{display:block;font-weight:400;color:#8a94a1;font-size:12px!important;word-break:break-all}
+.kx-search{min-height:46px!important}
+.kx-ba{display:flex;flex-direction:column;gap:8px;padding:12px;border:1px solid #e2e7ee;border-radius:12px}
+html.kx-on .kx-rich{outline:2px dashed rgba(24,99,220,.35);outline-offset:8px;cursor:text}
+html.kx-on .kx-rich:focus{outline:2px solid #1863dc}
+html.kx-on label .kx-text{cursor:text}
 

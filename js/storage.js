@@ -170,7 +170,7 @@ window.SITE_CONFIG = {
     ks.forEach(function (k) { if (!o[k] || typeof o[k] !== 'object') o[k] = {}; o = o[k]; });
     o[last] = val;
   }
-  var ORIGINAL = { data: clone(window.DRP_DATA), i18n: clone(window.DRP_I18N) };
+  var ORIGINAL = { data: clone(window.DRP_DATA), i18n: clone(window.DRP_I18N), legal: window.DRP_LEGAL ? clone(window.DRP_LEGAL) : null };
   // Fingerabdruck von data.js: gespeicherte Objektdaten gelten nur für genau diesen Stand.
   // Sonst würde eine alte, vollständige Kopie jede spätere Aktualisierung der Website überdecken.
   var DATA_SIG = (function (str) { var h = 5381; for (var i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) | 0; return (h >>> 0).toString(36); })(JSON.stringify(window.DRP_DATA));
@@ -191,6 +191,7 @@ window.SITE_CONFIG = {
       Object.keys(c.i18n[l]).forEach(function (k) { setKey(i18n[l], k, c.i18n[l][k]); });
     });
     window.DRP_I18N = i18n;
+    if (ORIGINAL.legal) { window.DRP_LEGAL = clone(ORIGINAL.legal); if (c && c.legal) window.DRP_LEGAL.privacy.en = c.legal; }
   }
   window.DRP_STORE = { original: ORIGINAL, apply: apply, resolve: resolve, clone: clone, dataSig: DATA_SIG };
 
