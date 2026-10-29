@@ -111,7 +111,7 @@
   status: {
     "a-vendre": "Ze verkafen",
     "a-louer": "Ze lounen",
-    "vendu": "Verkaf",
+    "vendu": "Verkaaft",
     "loue": "Verlount",
     "en-cours": "Am Gaang",
     "realise": "Fäerdeg"
