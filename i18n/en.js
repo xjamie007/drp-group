@@ -105,7 +105,7 @@
   bereich: {
     luxembourg: { line: "Real estate agency: buying, selling, renting, valuation" },
     "real-estate": { line: "Development: renovation, transformation, new builds" },
-    senses: { line: "Trade, product development, consulting" },
+    senses: { line: "Furniture, tiles, building materials" },
     architecture: { line: "Architecture" }
   },
   status: {
@@ -197,15 +197,12 @@
     ba_label: "Before / after comparison"
   },
   senses: {
-    intro: "DRP Senses trades goods in Luxembourg and abroad, including online and on social media. The company also develops its own products and advises businesses on sales, marketing and communication.",
-    s1_t: "Furniture & materials",
-    s1_p: "Furniture, tiles and building materials.",
-    s2_t: "Product development",
-    s2_p: "Design, development and production of prototypes and new products, through to distribution.",
-    s3_t: "Sales & marketing advice",
-    s3_p: "Advice on sales, marketing and communication.",
-    words: "Prototypes · Design · Furniture · Tiles · Building materials",
-    words2: "Marketing · Communication · Advice · Sales"
+    intro: "DRP Senses sells furniture, tiles and building materials in Luxembourg.",
+    s1_t: "Furniture",
+    s2_t: "Tiles",
+    s3_t: "Building materials",
+    words: "Tiles · Furniture · Building materials",
+    words2: "Furniture · Building materials · Tiles"
   },
   arch: {
     film_label: "DRP Architecture – film",

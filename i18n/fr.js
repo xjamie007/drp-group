@@ -105,7 +105,7 @@
   bereich: {
     luxembourg: { line: "Agence immobilière : achat, vente, location, estimation" },
     "real-estate": { line: "Promotion : rénovation, transformation, nouvelles constructions" },
-    senses: { line: "Commerce, développement de produits, conseil" },
+    senses: { line: "Mobilier, carrelage, matériaux de construction" },
     architecture: { line: "Architecture" }
   },
   status: {
@@ -197,15 +197,12 @@
     ba_label: "Comparaison avant / après"
   },
   senses: {
-    intro: "DRP Senses fait du commerce au Luxembourg et à l’étranger, y compris en ligne et sur les réseaux sociaux. La société conçoit aussi ses propres produits et conseille les entreprises en vente, marketing et communication.",
-    s1_t: "Mobilier & matériaux",
-    s1_p: "Mobilier, carrelage et matériaux de construction.",
-    s2_t: "Conception de produits",
-    s2_p: "Création, design et production de prototypes et de produits nouveaux, jusqu’à leur distribution.",
-    s3_t: "Conseil commercial & marketing",
-    s3_p: "Conseil commercial, en marketing et en communication.",
-    words: "Prototypes · Design · Mobilier · Carrelage · Matériaux",
-    words2: "Marketing · Communication · Conseil · Vente"
+    intro: "DRP Senses vend du mobilier, du carrelage et des matériaux de construction au Luxembourg.",
+    s1_t: "Mobilier",
+    s2_t: "Carrelage",
+    s3_t: "Matériaux de construction",
+    words: "Carrelage · Mobilier · Matériaux de construction",
+    words2: "Mobilier · Matériaux de construction · Carrelage"
   },
   arch: {
     film_label: "DRP Architecture – film",

@@ -105,7 +105,7 @@
   bereich: {
     luxembourg: { line: "Immobilienagentur: Kauf, Verkauf, Vermietung, Bewertung" },
     "real-estate": { line: "Projektentwicklung: Renovierung, Umbau, Neubau" },
-    senses: { line: "Handel, Produktentwicklung, Beratung" },
+    senses: { line: "Möbel, Fliesen, Baustoffe" },
     architecture: { line: "Architektur" }
   },
   status: {
@@ -197,15 +197,12 @@
     ba_label: "Vergleich vorher / nachher"
   },
   senses: {
-    intro: "DRP Senses handelt in Luxemburg und im Ausland, auch online und über soziale Netzwerke. Außerdem entwickelt das Unternehmen eigene Produkte und berät Firmen in Vertrieb, Marketing und Kommunikation.",
-    s1_t: "Möbel & Materialien",
-    s1_p: "Möbel, Fliesen und Baustoffe.",
-    s2_t: "Produktentwicklung",
-    s2_p: "Entwurf, Design und Herstellung von Prototypen und neuen Produkten bis zum Vertrieb.",
-    s3_t: "Vertriebs- & Marketingberatung",
-    s3_p: "Beratung in Vertrieb, Marketing und Kommunikation.",
-    words: "Prototypen · Design · Möbel · Fliesen · Baustoffe",
-    words2: "Marketing · Kommunikation · Beratung · Vertrieb"
+    intro: "DRP Senses verkauft Möbel, Fliesen und Baustoffe in Luxemburg.",
+    s1_t: "Möbel",
+    s2_t: "Fliesen",
+    s3_t: "Baustoffe",
+    words: "Fliesen · Möbel · Baustoffe",
+    words2: "Möbel · Baustoffe · Fliesen"
   },
   arch: {
     film_label: "DRP Architecture – Film",

@@ -105,7 +105,7 @@
   bereich: {
     luxembourg: { line: "Immobilienagence: Kaf, Verkaf, Locatioun, Estimatioun" },
     "real-estate": { line: "Promotioun: Renovatioun, Ëmbau, Neibau" },
-    senses: { line: "Handel, Produktentwécklung, Berodung" },
+    senses: { line: "Miwwel, Plättercher, Baumaterial" },
     architecture: { line: "Architektur" }
   },
   status: {
@@ -197,15 +197,12 @@
     ba_label: "Vergläich virdrun / duerno"
   },
   senses: {
-    intro: "DRP Senses mécht Handel zu Lëtzebuerg an am Ausland, och online an iwwer sozial Netzwierker. Doriwwer eraus entwéckelt d’Firma eege Produiten a beréit Betriber a Vertrieb, Marketing a Kommunikatioun.",
-    s1_t: "Miwwel & Materialien",
-    s1_p: "Miwwel, Plättercher a Baumaterial.",
-    s2_t: "Produktentwécklung",
-    s2_p: "Entworf, Design a Produktioun vu Prototypen an neie Produiten bis zum Vertrieb.",
-    s3_t: "Vertriebs- a Marketingberodung",
-    s3_p: "Berodung a Vertrieb, Marketing a Kommunikatioun.",
-    words: "Prototypen · Design · Miwwel · Plättercher · Baumaterial",
-    words2: "Marketing · Kommunikatioun · Berodung · Vertrieb"
+    intro: "DRP Senses verkeeft Miwwel, Plättercher a Baumaterial zu Lëtzebuerg.",
+    s1_t: "Miwwel",
+    s2_t: "Plättercher",
+    s3_t: "Baumaterial",
+    words: "Plättercher · Miwwel · Baumaterial",
+    words2: "Miwwel · Baumaterial · Plättercher"
   },
   arch: {
     film_label: "DRP Architecture – Film",

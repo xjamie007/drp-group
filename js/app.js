@@ -723,11 +723,11 @@
     show(0);
   }
 
-  /* DRP Senses: Einleitung, drei Leistungs-Boxen (wie „Unsere Unternehmen“), Wortband, das beim Scrollen gleitet */
+  /* DRP Senses: Einleitung, drei Boxen (Möbel, Fliesen, Baustoffe) (wie „Unsere Unternehmen“), Wortband, das beim Scrollen gleitet */
   var SENSES_ICON = [
     VENTURE_ICON.senses,
-    ventureSvg(["M32 8 L54 20 V44 L32 56 L10 44 V20 Z", "M10 20 L32 32 L54 20", "M32 32 V56", "M21 14 L43 26 V34"]),
-    ventureSvg(["M8 12 H46 V38 H24 L14 48 V38 H8 Z", "M18 30 V25 M27 30 V20 M36 30 V16", "M50 22 H56 V52 H32 V44"])
+    ventureSvg(["M10 10 H54 V54 H10 Z", "M10 32 H54", "M32 10 V54"]),
+    ventureSvg(["M32 8 L54 20 V44 L32 56 L10 44 V20 Z", "M10 20 L32 32 L54 20", "M32 32 V56", "M21 14 L43 26 V34"])
   ];
   function sensesBody() {
     // zwei Zeilen ohne gemeinsame Wörter → nie dasselbe Wort übereinander; das mittlere Wort der mittleren Kopie steht in der Bildmitte
@@ -743,7 +743,7 @@
         var n = i + 1;
         return '<div class="venture">' +
           '<span class="venture__top"><span class="venture__num" aria-hidden="true">0' + n + "</span>" + icon + "</span>" +
-          '<span class="venture__body"><span class="venture__name">' + esc(t("senses.s" + n + "_t")) + '</span><span class="venture__line">' + esc(t("senses.s" + n + "_p")) + "</span></span></div>";
+          '<span class="venture__body"><span class="venture__name">' + esc(t("senses.s" + n + "_t")) + "</span></span></div>";
       }).join("") + "</div></div></section>" +
       '<section class="senses-words" aria-hidden="true">' + line("senses.words", "") + line("senses.words2", "senses-words__line--rev") + "</section>";
   }
