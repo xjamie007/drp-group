@@ -276,6 +276,9 @@
     green: "Green Challenge : un arbre planté pour chaque unité vendue."
   },
   sust: {
+    value_quote: "Le prix est ce que vous payez. La valeur est ce que vous obtenez.",
+    value_p1: "DRP Group est synonyme d’un développement harmonieux et d’un bon service pour ses clients et ses fournisseurs. Ainsi, DRP Group s’engage à construire un avenir durable.",
+    value_p2: "Notre Green Challenge incarne notre vision première : adapter les projets à leur environnement. En intégrant arbres et plantes à l’intérieur comme à l’extérieur, le groupe veut réunir la nature et les constructions humaines et créer ainsi des piliers harmonieux pour l’avenir du développement.",
     seed_alt: "Une main plante une graine dans la terre, une jeune pousse en sort.",
     title: "Durabilité",
     lead: "« Notre vision repose sur deux piliers : des projets durables et la satisfaction de nos clients. »",
@@ -352,7 +355,7 @@
     privacy_link: "politique de confidentialité",
     submit: "Envoyer la demande",
     send: "Envoyer le message",
-    recipient: "Votre demande est adressée à info@drp-group.lu.",
+    recipient: "Votre demande est adressée à info@drp-group.lu",
     required: "Champ obligatoire",
     err_required: "Veuillez remplir ce champ.",
     err_email: "Veuillez saisir une adresse e-mail valide.",

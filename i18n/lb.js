@@ -276,6 +276,9 @@
     green: "Green Challenge: fir all verkaf Eenheet gëtt e Bam geplanzt."
   },
   sust: {
+    value_quote: "De Präis ass dat, wat Dir bezuelt. De Wäert ass dat, wat Dir kritt.",
+    value_p1: "DRP Group steet fir eng harmonesch Entwécklung an e gudde Service fir seng Clienten a Fournisseuren. Domat engagéiert sech DRP Group fir eng nohalteg Zukunft.",
+    value_p2: "Eis Green Challenge ëmfaasst eis wichtegst Visioun: Projeten un hiren Ëmfeld unzepassen. Mat Beem a Planzen dobannen an dobaussen wëll de Grupp Natur a Gebautes mateneen verbannen an esou harmonesch Säulen fir d’Zukunft vun der Entwécklung schafen.",
     seed_alt: "Eng Hand leet e Some an d’Äerd, doraus wiisst e klenge Sprëtz.",
     title: "Nohaltegkeet",
     lead: "„Eis Visioun stécht op zwee Piliere: nohalteg Projeten an zefridde Clienten.“",
@@ -285,7 +288,7 @@
     gc_text: "Fir all verkaf Eenheet gëtt e Bam geplanzt. Eis Green Challenge passt d’Projeten un hir Ëmgéigend un: Beem a Planze gehéieren zur Gestaltung bannen a baussen, fir datt Natur a Gebai zesummekommen.",
     principles_title: "Wéi mir schaffen",
     p1: "Ekologeschen Engagement mat moderner Architektur verbannen",
-    p2: "Den Dagesliicht esou effizient wéi méiglech notzen",
+    p2: "Dagesliicht esou effizient wéi méiglech notzen",
     p3: "Eng Kreeslafwirtschaft vu wiederverwendbare Materialien an erneierbarer Energie respektéieren",
     p4: "Ëmweltfrëndlech Materialien fir eis Projete wielen",
     figures_title: "An Zuelen",
@@ -352,7 +355,7 @@
     privacy_link: "Dateschutzerklärung",
     submit: "Ufro schécken",
     send: "Message schécken",
-    recipient: "Är Ufro geet un info@drp-group.lu.",
+    recipient: "Är Ufro geet un info@drp-group.lu",
     required: "Obligatorescht Feld",
     err_required: "W.e.g. dëst Feld ausfëllen.",
     err_email: "W.e.g. eng gülteg E-Mail-Adress aginn.",

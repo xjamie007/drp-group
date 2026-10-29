@@ -45,9 +45,9 @@ window.DRP_DATA = {
       "L-6182 Gonderange",
       "Luxembourg"
     ],
-    "adresse_note": "former 'rue de l'école'",
-    "lat": 49.69266,
-    "lng": 6.24435,
+    "adresse_note": null,
+    "lat": 49.69053,
+    "lng": 6.23991,
     "telephones": [
       {
         "label": "+352 26 78 15 22",

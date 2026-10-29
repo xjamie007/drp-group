@@ -1209,7 +1209,6 @@
     cleanups.push(function () { io.disconnect(); });
   }
   pages.durabilite = function (main) {
-    var green = D.items.filter(function (i) { return i.type === "projet" && txt(i.description).join(" ").indexOf("Green Challenge") > -1; });
     main.innerHTML = pageHead(D.site.entetes.durabilite, t("nav.sustainability")) +
       '<section class="section"><div class="wrap wrap--narrow"><p class="lead">' + esc(t("sust.vision")) + "</p></div></section>" +
       '<section class="section section--off"><div class="wrap"><div class="split">' +
@@ -1219,7 +1218,9 @@
       '<section class="section"><div class="wrap"><h2 class="h-section" style="margin-bottom:32px">' + esc(t("sust.principles_title")) + '</h2><ul class="principles">' +
       ["p1", "p2", "p3", "p4"].map(function (k, i) { return '<li><span class="service__num">0' + (i + 1) + "</span><strong>" + esc(t("sust." + k)) + "</strong></li>"; }).join("") +
       "</ul></div></section>" +
-      '<section class="section"><div class="wrap"><h2 class="h-section" style="margin-bottom:40px">' + esc(t("sust.projects_title")) + '</h2><div class="grid">' + green.map(card).join("") + "</div></div></section>" +
+      // statt der Projekte: Leitsatz und Haltung (Text von DRP)
+      '<section class="quote"><div class="wrap"><blockquote><p>' + esc(t("sust.value_quote")) + "</p></blockquote></div></section>" +
+      '<section class="section section--tight"><div class="wrap wrap--narrow"><p class="lead">' + esc(t("sust.value_p1")) + '</p><p class="lead" style="margin-top:24px">' + esc(t("sust.value_p2")) + "</p></div></section>" +
       ctaBand();
     initSeedArt(main);
   };
@@ -1279,10 +1280,10 @@
       titleHead(t("nav.contact"), t("contact.lead")) +
       '<div class="wrap"><div class="split split--top" style="padding:clamp(48px,6vw,96px) 0 clamp(64px,10vw,140px)"><div>' +
       '<ul class="keyfacts" style="margin-bottom:32px">' +
-      "<li><span>" + esc(t("contact.address")) + "</span><span>" + esc(s.societe) + "<br>" + s.adresse.map(esc).join("<br>") + "<br><small class=\"muted\">(" + esc(s.adresse_note) + ")</small></span></li>" +
+      "<li><span>" + esc(t("contact.address")) + "</span><span>" + esc(s.societe) + "<br>" + s.adresse.map(esc).join("<br>") + (s.adresse_note ? "<br><small class=\"muted\">(" + esc(s.adresse_note) + ")</small>" : "") + "</span></li>" +
       "<li><span>" + esc(t("contact.phone")) + "</span><span>" + s.telephones.map(function (p) { return '<a href="' + p.href + '">' + esc(p.label) + "</a>"; }).join("<br>") + "</span></li>" +
       "<li><span>" + esc(t("contact.email")) + '</span><span><a href="mailto:' + s.email + '">' + esc(s.email) + "</a></span></li></ul>" +
-      '<div class="mini-map" id="mini-map" role="img" aria-label="Gonderange"></div><p class="map-note">' + esc(t("common.approx")) + "</p></div>" +
+      '<div class="mini-map" id="mini-map" role="img" aria-label="' + esc(s.societe + ", " + s.adresse.join(", ")) + '"></div></div>' +
       '<div><h2 class="h-section" style="margin-bottom:28px">' + esc(t("contact.form_title")) + "</h2>" +
       '<form class="form" novalidate data-form="contact"><div class="form-grid">' +
       field("subject", t("contact.subject"), '<select id="f-subject" name="subject"><option value="general">' + esc(t("contact.subject_general")) + '</option><option value="visit"' + (visit ? " selected" : "") + ">" + esc(t("contact.subject_visit")) + "</option></select>", "full") +
@@ -1299,7 +1300,7 @@
     loadLeaflet().then(function (L) {
       var el = miniEl; if (!el || !document.body.contains(el)) return;
       var map = baseMap(L, el, {});
-      map.setView([s.lat, s.lng], 13);
+      map.setView([s.lat, s.lng], 16); // genaue Adresse des Büros
       L.marker([s.lat, s.lng], { icon: markerIcon(L, [{ type: "projet", statut: "" }]), title: "DRP Group", alt: "DRP Group" }).addTo(map);
     });
   };

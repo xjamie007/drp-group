@@ -276,6 +276,9 @@
     green: "Green Challenge: a tree is planted for every unit sold."
   },
   sust: {
+    value_quote: "Price is what you pay. Value is what you get.",
+    value_p1: "DRP Group stands for a harmonious development and a good service for its customers and suppliers. With this, DRP Group is committed to building a sustainable future.",
+    value_p2: "Our Green Challenge encompasses our primary vision to adapt projects to their surroundings. Incorporating trees and plants for interior and exterior builds, the Group aims to unify nature and man-made developments, all by creating harmonious pillars for the future of development.",
     seed_alt: "A hand plants a seed in the ground and a small sprout grows from it.",
     title: "Sustainability",
     lead: "“Our vision is centred on two categories: sustainable projects and satisfaction for our clients.”",
@@ -352,7 +355,7 @@
     privacy_link: "privacy policy",
     submit: "Send request",
     send: "Send message",
-    recipient: "Your request goes to info@drp-group.lu.",
+    recipient: "Your request goes to info@drp-group.lu",
     required: "Required field",
     err_required: "Please fill in this field.",
     err_email: "Please enter a valid e-mail address.",
