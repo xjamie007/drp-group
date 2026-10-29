@@ -1219,7 +1219,7 @@
       ["p1", "p2", "p3", "p4"].map(function (k, i) { return '<li><span class="service__num">0' + (i + 1) + "</span><strong>" + esc(t("sust." + k)) + "</strong></li>"; }).join("") +
       "</ul></div></section>" +
       // statt der Projekte: Leitsatz und Haltung (Text von DRP)
-      '<section class="quote"><div class="wrap"><blockquote><p>' + esc(t("sust.value_quote")) + "</p></blockquote></div></section>" +
+      '<section class="quote quote--soft"><div class="wrap"><blockquote><p>' + esc(t("sust.value_quote")) + "</p></blockquote></div></section>" +
       '<section class="section section--tight"><div class="wrap wrap--narrow"><p class="lead">' + esc(t("sust.value_p1")) + '</p><p class="lead" style="margin-top:24px">' + esc(t("sust.value_p2")) + "</p></div></section>" +
       ctaBand();
     initSeedArt(main);
