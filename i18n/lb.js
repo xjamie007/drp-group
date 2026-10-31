@@ -98,7 +98,7 @@
     contact: "Kontakt",
     companies: "Eis Betriber",
     group: "DRP Group",
-    follow: "Follegt eis",
+    follow: "Followt eis",
     privacy: "Dateschutz",
     rights: "All Rechter reservéiert."
   },
